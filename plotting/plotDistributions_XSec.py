@@ -17,22 +17,24 @@ and other theory predictions
 > doData gets the unfolded data and other theory predictions from unfolding code
 '''
 ##################################################
-# processes = ['W1J']
-# tablenames = ['d06-x01-y01.merged', 'd31-x01-y01.merged', 'd56-x01-y01.merged', 'd81-x01-y01.merged']
-processes = ['W2J']
-tablenames = ['d07-x01-y01.merged', 'd57-x01-y01.merged']
+processes = ['W1J']
+tablenames = ['d56-x01-y01.merged']
+#processes = ['W2J']
+#tablenames = ['d57-x01-y01.merged', 'd63-x01-y01.merged']
+#processes = ['W3J']
+#tablenames = ['d58-x01-y01.merged', 'd64-x01-y01.merged']
 ## --
 #pdfnames = ['CT10nlo', 'CT14nlo', 'NNPDF23_nlo', 'NNPDF30_nlo', 'NNPDF31_nnlo']
 pdfnames = ['CT14nlo']
 ## --
-# doErrors = True
-doErrors = False
+doErrors = True
+# doErrors = False
 ## --
-doNP = True
-# doNP = False
+# doNP = True
+doNP = False
 ## --
 doData = True
-# doData = False
+#doData = False
 ##################################################
 MEgen = "Openloops"
 order = "NLO"
@@ -86,6 +88,15 @@ for process in processes:
                     variable = "LepPtPlusLeadingJetPt_Zinc2jet_TUnfold"
                 if (tablename == 'd57-x01-y01.merged'):
                     variable = "LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold"
+                if (tablename == 'd63-x01-y01.merged'):
+                    variable = "LepPtPlusHT2over2AK8_Zinc2jet_TUnfold"
+                if (tablename == 'd82-x01-y01.merged'):
+                    variable = "LepPtPlusLeadingJetAK8Pt_Zexc2jet_TUnfold"
+            if (process == 'W3J'):
+                if (tablename == 'd58-x01-y01.merged'):
+                    variable = "LepPtPlusLeadingJetAK8Pt_Zinc3jet_TUnfold"
+                if (tablename == 'd64-x01-y01.merged'):
+                    variable = "LepPtPlusHT2over2AK8_Zinc3jet_TUnfold"
 
             print ("\n===========================================================================")
             print ("\nDoing variable: "+str(variable))
@@ -94,9 +105,14 @@ for process in processes:
             print ("Number of bins in histogram: "+str(numBins))
 
             if (doData):
+                ## Full Run 2 --
                 fileNameUnf = ("UnfoldedFiles_Run2/SMu_unfolded_"+variable+"_TUnfold_JetPtMin_30_JetEtaMax_24_MGPYTHIA6_.root")
                 print ("\nOpening: "+fileNameUnf)
                 fUnf = ROOT.TFile.Open(fileNameUnf, "READ")
+                ## 2016 only --
+#                 fileNameUnf = ("UnfoldedFiles_2016/SMu_unfolded_"+variable+"_TUnfold_JetPtMin_30_JetEtaMax_24_MGPYTHIA6_.root")
+#                 print ("\nOpening: "+fileNameUnf)
+#                 fUnf = ROOT.TFile.Open(fileNameUnf, "READ")
 
             ##################################################################################
             ## 1b) Grab uncertainties and SFs
@@ -218,41 +234,60 @@ for process in processes:
             ## Distributions from FastNLO tables are not allowed to have any bins with zero entries
             ROOT.gPad.SetLogy() #set y-axis as logarithmic
             if (process == 'W1J'):
-                if (tablename == 'd06-x01-y01.merged'):
+                if   (tablename == 'd06-x01-y01.merged'):
                     ymin = 0.0015
                     ymax = 100
                     xtitle = 'Muon p_{T} + Leading Jet p_{T} [GeV]'
                     ytitle = 'd#sigma/dp_{T} [pb/GeV]'
-                    binDataOffset = 2
+                    binDataOffset = 1
                 elif (tablename == 'd31-x01-y01.merged'):
                     ymin = 0.0004
                     ymax = 100
                     xtitle = 'Muon p_{T} + Leading Jet p_{T} [GeV]'
                     ytitle = 'd#sigma/dp_{T} [pb/GeV]'
-                    binDataOffset = 2
+                    binDataOffset = 1
                 elif (tablename == 'd56-x01-y01.merged'):
-                    ymin = 0.0007
+                    ymin = 0.00009
                     ymax = 0.45
                     xtitle = 'Muon p_{T} + Leading Jet p_{T} [GeV]'
                     ytitle = 'd#sigma/dp_{T} [pb/GeV]'
                     binDataOffset = 1
                 elif (tablename == 'd81-x01-y01.merged'):
-                    ymin = 0.0005
+                    ymin = 0.00005
                     ymax = 0.45
                     xtitle = 'Muon p_{T} + Leading Jet p_{T} [GeV]'
                     ytitle = 'd#sigma/dp_{T} [pb/GeV]'
                     binDataOffset = 1
             if (process == 'W2J'):
-                if (tablename == 'd07-x01-y01.merged'):
+                if   (tablename == 'd07-x01-y01.merged'):
                     ymin = 0.0015
                     ymax = 20.
                     xtitle = 'Muon p_{T} + Leading Jet p_{T} [GeV]'
                     ytitle = 'd#sigma/dp_{T} [pb/GeV]'
-                    binDataOffset = 2
+                    binDataOffset = 1
                 elif (tablename == 'd57-x01-y01.merged'):
-                    ymin = 0.0002
+                    ymin = 0.00002
                     ymax = 0.08
                     xtitle = 'Muon p_{T} + Leading Jet p_{T} [GeV]'
+                    ytitle = 'd#sigma/dp_{T} [pb/GeV]'
+                    binDataOffset = 1
+                elif (tablename == 'd63-x01-y01.merged'):
+                    ymin = 0.00001
+                    ymax = 0.08
+                    xtitle = 'Muon p_{T} + H_{T,2}/2 [GeV]'
+                    ytitle = 'd#sigma/dp_{T} [pb/GeV]'
+                    binDataOffset = 1
+            if (process == 'W3J'):
+                if   (tablename == 'd58-x01-y01.merged'):
+                    ymin = 0.000003
+                    ymax = 0.004
+                    xtitle = 'Muon p_{T} + Leading AK8 Jet p_{T} [GeV]'
+                    ytitle = 'd#sigma/dp_{T} [pb/GeV]'
+                    binDataOffset = 1
+                elif (tablename == 'd64-x01-y01.merged'):
+                    ymin = 0.000001
+                    ymax = 0.004
+                    xtitle = 'Muon p_{T} + H_{T,2}/2 [GeV]'
                     ytitle = 'd#sigma/dp_{T} [pb/GeV]'
                     binDataOffset = 1
 
@@ -394,14 +429,15 @@ for process in processes:
             latexWJet.SetTextColor(ROOT.kBlack)
             latexWJet.SetTextAlign(11)
             latexWJet.SetName("latexWJet")
-            if (MEgen == "Openloops"):
-                if (process == "W1J"):
-                    if (tablename == 'd31-x01-y01.merged' or tablename == 'd81-x01-y01.merged'):
-                        wtitle = "W(#rightarrow#mu#nu) + 1j"
-                    else:
-                        wtitle = "W(#rightarrow#mu#nu) + 1j + X"
-                elif (process == "W2J"):
-                    wtitle = "W(#rightarrow#mu#nu) + 2j + X"
+            if (process == "W1J"):
+                if (tablename == 'd31-x01-y01.merged' or tablename == 'd81-x01-y01.merged'):
+                    wtitle = "W(#rightarrow#mu#nu) + 1j"
+                else:
+                    wtitle = "W(#rightarrow#mu#nu) + 1j + X"
+            elif (process == "W2J"):
+                wtitle = "W(#rightarrow#mu#nu) + 2j + X"
+            elif (process == "W3J"):
+                wtitle = "W(#rightarrow#mu#nu) + 3j + X"
             latexWJet.DrawLatex(0.63,0.55, wtitle)
             if (doNP):
                 MEgentitle = "NP Corr. Applied"
@@ -425,7 +461,8 @@ for process in processes:
             htemp1.GetYaxis().SetTitleOffset(0.45)
             htemp1.GetYaxis().SetTitleSize(0.09)
             htemp1.GetYaxis().SetLabelSize(0.06)
-            htemp1.GetYaxis().SetRangeUser(0.01, 2.15)
+            # htemp1.GetYaxis().SetRangeUser(0.01, 2.15)
+            htemp1.GetYaxis().SetRangeUser(0.51, 1.49)
             htemp1.SetTitle("")
             htemp1.Draw()
 

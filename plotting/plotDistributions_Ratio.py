@@ -18,21 +18,29 @@ unfolded data and other theory predictions
 '''
 ##################################################
 ### R21 (list num first, then denom)
-numerator = 'W2J'
+#numerator = 'W2J'
+#denominator = 'W1J'
+#tablenames = [ ['d57-x01-y01.merged','d56-x01-y01.merged'] ]
+# ### R32 (list num first, then denom)
+#numerator = 'W3J'
+#denominator = 'W2J'
+#tablenames = [ ['d58-x01-y01.merged','d57-x01-y01.merged'], ['d64-x01-y01.merged','d63-x01-y01.merged'] ]
+# ### R31 (list num first, then denom)
+numerator = 'W3J'
 denominator = 'W1J'
-tablenames = [ ['d07-x01-y01.merged','d06-x01-y01.merged'], ['d07-x01-y01.merged','d31-x01-y01.merged'], ['d57-x01-y01.merged','d56-x01-y01.merged'], ['d57-x01-y01.merged','d81-x01-y01.merged'] ]
+tablenames = [ ['d58-x01-y01.merged','d56-x01-y01.merged'] ]
 ## --
 #pdfnames = ['CT10nlo', 'CT14nlo', 'NNPDF23_nlo', 'NNPDF30_nlo', 'NNPDF31_nnlo']
 pdfnames = ['CT14nlo']
 ## --
-# doErrors = True
-doErrors = False
+doErrors = True
+# doErrors = False
 ## --
-doNP = True
-# doNP = False
+# doNP = True
+doNP = False
 ## --
 doData = True
-# doData = False
+#doData = False
 ##################################################
 MEgen = "Openloops"
 order = "NLO"
@@ -79,6 +87,8 @@ for tablename in tablenames:
 
         ## Grab unfolded data and signal W+jets MC
         ## Need to make sure that these unfolded variables exist
+        variableNum = ""
+        variableDenom = ""
         if ((numerator == 'W2J') and (denominator == 'W1J')):
             if (tablename[0] == 'd07-x01-y01.merged' and tablename[1] == 'd06-x01-y01.merged'):
                 variableNum = "LepPtPlusLeadingJetPt_Zinc2jet_TUnfold"
@@ -92,6 +102,17 @@ for tablename in tablenames:
             elif (tablename[0] == 'd57-x01-y01.merged' and tablename[1] == 'd81-x01-y01.merged'):
                 variableNum = "LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold"
                 variableDenom = "LepPtPlusLeadingJetAK8Pt_Zexc1jet_TUnfold"
+        elif ((numerator == 'W3J') and (denominator == 'W2J')):
+            if (tablename[0] == 'd58-x01-y01.merged' and tablename[1] == 'd57-x01-y01.merged'):
+                variableNum = "LepPtPlusLeadingJetAK8Pt_Zinc3jet_TUnfold"
+                variableDenom = "LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold"
+            if (tablename[0] == 'd64-x01-y01.merged' and tablename[1] == 'd63-x01-y01.merged'):
+                variableNum = "LepPtPlusHT2over2AK8_Zinc3jet_TUnfold"
+                variableDenom = "LepPtPlusHT2over2AK8_Zinc2jet_TUnfold"
+        elif ((numerator == 'W3J') and (denominator == 'W1J')):
+            if (tablename[0] == 'd58-x01-y01.merged' and tablename[1] == 'd56-x01-y01.merged'):
+                variableNum = "LepPtPlusLeadingJetAK8Pt_Zinc3jet_TUnfold"
+                variableDenom = "LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold"
 
         print ("\n===========================================================================")
         print("\nDoing variables: "+str(variableNum)+" & "+str(variableDenom))
@@ -101,10 +122,15 @@ for tablename in tablenames:
 
         # If including data, first get input filename
         if (doData):
+            ## Full Run 2
             fileNameRatio = ("UnfoldedFilesRatio_Run2/SMu_RATIO_"+variableNum+"_TO_"+variableDenom+"_JetPtMin_30_JetEtaMax_24_MGPYTHIA6_.root")
             print ("\nOpening file: "+fileNameRatio)
             fRatio = ROOT.TFile.Open(fileNameRatio, "READ")
-        
+            ## 2016 only
+#             fileNameRatio = ("UnfoldedFilesRatio_2016/SMu_RATIO_"+variableNum+"_TO_"+variableDenom+"_JetPtMin_30_JetEtaMax_24_MGPYTHIA6_.root")
+#             print ("\nOpening file: "+fileNameRatio)
+#             fRatio = ROOT.TFile.Open(fileNameRatio, "READ")
+
         ##################################################################################
         ## 1b) Grab uncertainties and SFs
 
@@ -229,26 +255,49 @@ for tablename in tablenames:
 
         ## Get y-bounds and titles depending on distribution
         ## Using linear y-axis for ratios
+        ymax = 0.3
+        xtitle = 'pT [GeV]'
+        title = 'title'
+        binDataOffset = 1
         if ((numerator == 'W2J') and (denominator == 'W1J')):
             title = 'Ratio of W+2j+X/W+1j+X'
             if (tablename[0] == 'd07-x01-y01.merged' and tablename[1] == 'd06-x01-y01.merged'):
                 ymax = 1.4
                 xtitle = 'Muon pT + Leading Jet pT [GeV]'
                 title += ', Muon pT + Leading Jet pT'
-                binDataOffset = 2
+                binDataOffset = 1
             if (tablename[0] == 'd07-x01-y01.merged' and tablename[1] == 'd31-x01-y01.merged'):
                 ymax = 7.
                 xtitle = 'Muon pT + Leading Jet pT [GeV]'
                 title += ', Muon pT + Leading Jet pT'
-                binDataOffset = 2
+                binDataOffset = 1
             if (tablename[0] == 'd57-x01-y01.merged' and tablename[1] == 'd56-x01-y01.merged'):
                 ymax = 0.6
-                xtitle = 'Muon pT + Leading Jet pT [GeV]'
+                xtitle = 'Muon pT + Leading AK8 Jet pT [GeV]'
                 title += ', Muon pT + Leading Jet pT'
                 binDataOffset = 1
             if (tablename[0] == 'd57-x01-y01.merged' and tablename[1] == 'd81-x01-y01.merged'):
                 ymax = 0.8
                 xtitle = 'Muon pT + Leading Jet pT [GeV]'
+                title += ', Muon pT + Leading Jet pT'
+                binDataOffset = 1
+        elif ((numerator == 'W3J') and (denominator == 'W2J')):
+            title = 'Ratio of W+3j+X/W+2j+X'
+            if (tablename[0] == 'd58-x01-y01.merged' and tablename[1] == 'd57-x01-y01.merged'):
+                ymax = 0.3
+                xtitle = 'Muon pT + Leading AK8 Jet pT [GeV]'
+                title += ', Muon pT + Leading Jet pT'
+                binDataOffset = 1
+            if (tablename[0] == 'd64-x01-y01.merged' and tablename[1] == 'd63-x01-y01.merged'):
+                ymax = 0.3
+                xtitle = 'Muon pT + H_{T,2}/2 [GeV]'
+                title += ', Muon pT + HT,2/2'
+                binDataOffset = 1
+        elif ((numerator == 'W3J') and (denominator == 'W1J')):
+            title = 'Ratio of W+3j+X/W+1j+X'
+            if (tablename[0] == 'd58-x01-y01.merged' and tablename[1] == 'd56-x01-y01.merged'):
+                ymax = 0.1
+                xtitle = 'Muon pT + Leading AK8 Jet pT [GeV]'
                 title += ', Muon pT + Leading Jet pT'
                 binDataOffset = 1
                 
@@ -371,7 +420,7 @@ for tablename in tablenames:
         cmsLogo.SetTextColor(ROOT.kBlack)
         cmsLogo.SetTextAlign(11)
         cmsLogo.SetName("cmsLogo")
-        cmsLogo.DrawLatex(0.545,0.18,"CMS")
+        cmsLogo.DrawLatex(0.540,0.18,"CMS")
         del cmsLogo
         cmsPrelim = ROOT.TLatex()
         cmsPrelim.SetNDC()
@@ -393,11 +442,16 @@ for tablename in tablenames:
         latexWJet.SetName("latexWJet")
         if (MEgen == "Openloops"):
             MEgentitle = "OpenLoops+Sherpa"
-            if (numerator == "W2J"):
+            wtitle = ""
+            if ((numerator == 'W2J') and (denominator == 'W1J')):
                 if (tablename[1] == 'd31-x01-y01.merged' or tablename[1] == 'd81-x01-y01.merged'):
                     wtitle = "R_{21_{excl.}} = #frac{#sigma_{W(#rightarrow#mu#nu) + 2j + X}}{#sigma_{W(#rightarrow#mu#nu) + 1j}}"
                 else:
                     wtitle = "R_{21} = #frac{#sigma_{W(#rightarrow#mu#nu) + 2j + X}}{#sigma_{W(#rightarrow#mu#nu) + 1j + X}}"
+            elif ((numerator == 'W3J') and (denominator == 'W2J')):
+                wtitle = "R_{32} = #frac{#sigma_{W(#rightarrow#mu#nu) + 3j + X}}{#sigma_{W(#rightarrow#mu#nu) + 2j + X}}"
+            elif ((numerator == 'W3J') and (denominator == 'W1J')):
+                wtitle = "R_{31} = #frac{#sigma_{W(#rightarrow#mu#nu) + 3j + X}}{#sigma_{W(#rightarrow#mu#nu) + 1j + X}}"
         if (tablename[1] == 'd31-x01-y01.merged' or tablename[1] == 'd81-x01-y01.merged'):
             latexWJet.DrawLatex(0.526,0.08, wtitle)
         else:
@@ -424,7 +478,9 @@ for tablename in tablenames:
         htemp1.GetYaxis().SetTitleOffset(0.45)
         htemp1.GetYaxis().SetTitleSize(0.09)
         htemp1.GetYaxis().SetLabelSize(0.06)
-        htemp1.GetYaxis().SetRangeUser(0.01, 2.15)
+        # htemp1.GetYaxis().SetRangeUser(0.01, 2.15)
+        # htemp1.GetYaxis().SetRangeUser(0.51, 1.49)
+        htemp1.GetYaxis().SetRangeUser(0.701, 1.299)
         htemp1.SetTitle("")
         htemp1.Draw()
 

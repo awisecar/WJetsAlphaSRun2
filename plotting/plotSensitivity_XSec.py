@@ -17,12 +17,11 @@ variables =  ["LeadingJetPt_2_Zinc1jet_R21", "LepPtPlusLeadingJetPt_2_Zinc1jet_R
 #pdfnames = ['CT10nlo', 'CT14nlo', 'NNPDF23_nlo', 'NNPDF30_nlo', 'NNPDF31_nnlo']
 pdfnames = ['CT14nlo']
 ## --
-#doCutoff = True
-doCutoff = False
+doSyst = True    # CURRENTLY DOESN'T WORK, TRY FIXING WITH THE LINES IN THE CORRESPONDING SCRIPT FOR THE RATIO
+# doSyst = False
 ## --
-#doSyst = True
-doSyst = False
-systDir = "systFiles/"
+# doCutoff = True
+doCutoff = False
 ##################################################
 MEgen = "Openloops"
 order = "NLO"
@@ -160,6 +159,11 @@ for process in processes:
             procLatex.DrawLatex(0.55,legLowY-0.56, MEgen+"+Sherpa, NLO QCD")
             procLatex.DrawLatex(0.62,legLowY-0.6, wtitle)
 
+            line2 = ROOT.TLine(binCenME[0], 1., binCenME[numBins-1], 1.);
+            line2.SetLineColor(ROOT.kBlack);
+            line2.SetLineWidth(1);
+            line2.Draw()
+
             ## Keeping the graphs in a list allows us to draw multiple on canvas
             grMEPDFlist2 = []
             grMElist2 = []
@@ -268,10 +272,7 @@ for process in processes:
                 grSyst.Draw('PE same')
                 leg2.AddEntry(grSyst , "Systematic Error", "lpe")
 
-            line2 = ROOT.TLine(binCenME[0], 1., binCenME[numBins-1], 1.);
-            line2.SetLineColor(ROOT.kBlack);
-            line2.SetLineWidth(1);
-            line2.Draw()
+            
 
             ##########################################
             ## Find an average variation over a range
