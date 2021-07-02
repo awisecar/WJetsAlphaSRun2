@@ -9,7 +9,7 @@ import ROOT
 cwd = os.getcwd()
 #############################################
 
-# year = "2016"
+#year = "2016"
 year = "Run2"
 
 #################
@@ -25,9 +25,11 @@ variables = ["FirstJetPt_Zinc1jet_TUnfold", "FirstJetAbsRapidity_Zinc1jet_TUnfol
              "FirstJetAK8Pt_Zinc1jet_TUnfold", "FirstJetAK8AbsRapidity_Zinc1jet_TUnfold", "dPhiLepJet1AK8_Zinc1jet_TUnfold",
              "SecondJetAK8Pt_Zinc2jet_TUnfold", "SecondJetAK8AbsRapidity_Zinc2jet_TUnfold", "dPhiLepJet2AK8_Zinc2jet_TUnfold",
              "dRapidityJets_Zinc2jet_TUnfold", "dRapidityJetsAK8_Zinc2jet_TUnfold",
-             "LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold", "LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold", "LepPtPlusLeadingJetAK8Pt_Zinc3jet_TUnfold",
-             "LepPtPlusHT2over2AK8_Zinc2jet_TUnfold", "LepPtPlusHT2over2AK8_Zinc3jet_TUnfold"
+             "dRLepCloseJetCo300dR04_Zinc1jet_TUnfold", "dRLepCloseJetCo500dR04_Zinc1jet_TUnfold",
+             "LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold", "LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold"
             ]
+
+#variables = ["LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold", "LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold"]
 
 # full syst
 #names = ["Central", "PUUp", "PUDown", "JESUp", "JESDown", "XSECUp", "XSECDown", "JERUp", "JERDown", "LepSFUp", "LepSFDown", "BtagSFUp", "BtagSFDown", "L1PrefireUp", "L1PrefireDown", "LumiUp", "LumiDown"]
@@ -44,16 +46,16 @@ namesLegend = ["Pileup", "Jet Energy Scale", "Background Cross Section", "Jet En
 ### Need to cut off some of the leading bins for the jet pT-centric variables
 ### These leading bins are passed through the unfolding to allow for migrations up into the following bins
 ### Strategy here is just to use this number to alter what we see on the plot, i.e. the axis ranges
-# chopLeadingBins = 2 # chop off 2 first bins for the AK4 jet pT distributions
-chopLeadingBins = 0 # for now, don't chop any bins off of the beginning so that we can see the whole spectrum
+chopLeadingBins = 0
+chopEndingBins = 0
 
 ### Set as true if you want shaded bands as the total systematic uncertainty (added in quadrature)
-# doSystBands = True
-doSystBands = False
+doSystBands = True
+#doSystBands = False
 
 ### Plots MG5 NLO FxFx and LO MLM gen cross sections
-# doGenRecoComp = True
-doGenRecoComp = False
+doGenRecoComp = True
+#doGenRecoComp = False
 
 ###########################################################
 
@@ -68,14 +70,24 @@ for iVar, variable in enumerate(variables):
 
     if (variable == "FirstJetPt_Zinc1jet_TUnfold" or variable == "SecondJetPt_Zinc2jet_TUnfold"):
         chopLeadingBins = 2
+        chopEndingBins = 1
     elif (variable == "FirstJetAK8Pt_Zinc1jet_TUnfold" or variable == "SecondJetAK8Pt_Zinc2jet_TUnfold"):
         chopLeadingBins = 1
-    elif (variable == "LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold" or variable == "LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold" or variable == "LepPtPlusLeadingJetAK8Pt_Zinc3jet_TUnfold"):
-        chopLeadingBins = 1
-    elif (variable == "LepPtPlusHT2over2AK8_Zinc2jet_TUnfold" or variable == "LepPtPlusHT2over2AK8_Zinc3jet_TUnfold"):
-        chopLeadingBins = 1
+        if (variable == "FirstJetAK8Pt_Zinc1jet_TUnfold"):
+            chopEndingBins = 1
+        else:
+            chopEndingBins = 2
+    elif (variable == "dRLepCloseJetCo300dR04_Zinc1jet_TUnfold" or variable == "dRLepCloseJetCo500dR04_Zinc1jet_TUnfold"):
+        if (variable == "dRLepCloseJetCo300dR04_Zinc1jet_TUnfold"):
+            chopEndingBins = 2
+        else:
+            chopEndingBins = 1
+    elif (variable == "LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold" or variable == "LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold"):
+        chopLeadingBins = 3
+        chopEndingBins = 1
     else:
         chopLeadingBins = 0
+        chopEndingBins = 0
 
     print("\n>>>>>>>>>> Doing variable: "+str(variable))
     histos = []
@@ -92,10 +104,11 @@ for iVar, variable in enumerate(variables):
         hTemp.SetDirectory(0)
         for iBin in range(1, hTemp.GetNbinsX()+1):
             bincountTemp = hTemp.GetBinContent(iBin)
-            if (bincountTemp < 0.):
+            if ( (bincountTemp < 0.0) or (math.isnan(bincountTemp)) ):
                 print("---> Bin #"+str(iBin)+" count is below zero: "+str(bincountTemp))
                 print("---> Setting bin content to 0.0000000000001")
                 hTemp.SetBinContent(iBin, 0.0000000000001)
+                hTemp.SetBinError(iBin, 0.0)
         histos.append(hTemp)
         if (file.IsOpen()):
             print ("File "+fileName+" is still open, closing...")
@@ -129,13 +142,20 @@ for iVar, variable in enumerate(variables):
     ## Get x- and y-axis bounds ---
     hCentral = histos[0]
     numBins = hCentral.GetNbinsX()
+    # --- x-axis
+    # xmin
     if (chopLeadingBins > 0):
         print("\nChopping off the first "+str(chopLeadingBins)+" bins from the distribution!")
         xmin = hCentral.GetXaxis().GetBinLowEdge(1+chopLeadingBins)
     else:
         xmin = hCentral.GetXaxis().GetXmin()
-    xmax = hCentral.GetXaxis().GetXmax()
-
+    # xmax
+    if (chopEndingBins > 0):
+        print("\nChopping off the last "+str(chopEndingBins)+" bins from the distribution!")
+        xmax = hCentral.GetXaxis().GetBinUpEdge(numBins-chopEndingBins)
+    else:
+        xmax = hCentral.GetXaxis().GetXmax()
+    # --- y-axis
     if (chopLeadingBins > 0):
         ### This is probably only going to work for steeply falling dist., like jet pT
         ymin = hCentral.GetBinContent(numBins)
@@ -397,7 +417,7 @@ for iVar, variable in enumerate(variables):
         pad1.SetLogy()
 
         htemp = ROOT.TH1D("htemp", "htemp", 100, xmin, xmax)
-        htemp.GetYaxis().SetRangeUser(0.01, 100.)
+        htemp.GetYaxis().SetRangeUser(0.0005, 100.)
         htemp.GetYaxis().SetTitle("Percent Uncertainty")
         htemp.GetYaxis().SetTitleOffset(1.35)
         htemp.SetStats(0)
@@ -441,7 +461,8 @@ for iVar, variable in enumerate(variables):
         histos_PercentUncertainty.append(hTemp_PercUncert)
         histos_PercentUncertainty[int((numNames-1)/2)].Draw("SAME")
 
-        leg1 = ROOT.TLegend(0.625,0.1,0.9,0.4)
+#        leg1 = ROOT.TLegend(0.625,0.1,0.9,0.4) # nominal
+        leg1 = ROOT.TLegend(0.1,0.1,0.425,0.325)
         if (numNames > 1):
             leg1.AddEntry(histos_PercentUncertainty[int((numNames-1)/2)], "Total Syst. Uncertainty", "l")
             for i in range(0, int((numNames-1)/2), 1):

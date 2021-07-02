@@ -86,7 +86,7 @@ namespace Rivet {
       // _fnlo_WPtJetPt_1j_AK8       = MCgrid::bookGrid(_hist_WPtJetPt_1j_AK8, histoDir(), config_fnlo);
       //AK8 exclusive jet
       // _fnlo_JetPt_Exc_1j_AK8      = MCgrid::bookGrid(_hist_JetPt_Exc_1j_AK8, histoDir(), config_fnlo);
-      _fnlo_LepPtJetPt_Exc_1j_AK8 = MCgrid::bookGrid(_hist_LepPtJetPt_Exc_1j_AK8, histoDir(), config_fnlo);
+      // _fnlo_LepPtJetPt_Exc_1j_AK8 = MCgrid::bookGrid(_hist_LepPtJetPt_Exc_1j_AK8, histoDir(), config_fnlo);
 
 #endif
         
@@ -118,7 +118,7 @@ namespace Rivet {
         double eta0 = lepton0.eta();
 
         //muon pT and eta cuts
-        if ( (fabs(eta0) > 2.4) || (pt0 < 25.0*GeV) ) vetoEvent;
+        if ( (fabs(eta0) > 2.4) || (pt0 < 30.0*GeV) ) vetoEvent;
 
         // Obtain the jets (AK4 and AK8)
         vector<FourMomentum> finaljet_list;
@@ -139,12 +139,12 @@ namespace Rivet {
 
         // AK8 jets -----
         // loop over jets in an event, pushback in finaljet_list_AK8 collection
-        foreach (const Jet& j, applyProjection<FastJets>(event, "JetsAK8").jetsByPt(200.0*GeV)) {
+        foreach (const Jet& j, applyProjection<FastJets>(event, "JetsAK8").jetsByPt(50.0*GeV)) {
           const double jrap = j.momentum().rap();
           const double jpt = j.momentum().pT();
           //jet pT and dR(j,mu) cuts
           if ( (fabs(jrap) < 2.4) && (deltaR(lepton0, j.momentum()) > 0.8) ) {
-            if (jpt > 200.0*GeV) {
+            if (jpt > 50.0*GeV) {
               finaljet_list_AK8.push_back(j.momentum());
             }
           }
@@ -183,12 +183,20 @@ namespace Rivet {
         // AK8 histos/grids
         if(finaljet_list_AK8.size()>=1) {
           _hist_JetPt_1j_AK8->fill(finaljet_list_AK8[0].pT(), weight);
-          _hist_LepPtJetPt_1j_AK8->fill(pt0+finaljet_list_AK8[0].pT(), weight);
+         
+          if( (pt0 >= 50.0*GeV) && (finaljet_list_AK8[0].pT() >= 100.0*GeV) ){
+              _hist_LepPtJetPt_1j_AK8->fill(pt0+finaljet_list_AK8[0].pT(), weight);
+          }
+
           _hist_WPt_1j_AK8->fill(wBosonPt, weight);
           _hist_WPtJetPt_1j_AK8->fill(wBosonPt+finaljet_list_AK8[0].pT(), weight);
 #if USE_FNLO
           // _fnlo_JetPt_1j_AK8->fill(finaljet_list_AK8[0].pT(), event);
-          _fnlo_LepPtJetPt_1j_AK8->fill(pt0+finaljet_list_AK8[0].pT(), event);
+
+          if( (pt0 >= 50.0*GeV) && (finaljet_list_AK8[0].pT() >= 100.0*GeV) ){
+              _fnlo_LepPtJetPt_1j_AK8->fill(pt0+finaljet_list_AK8[0].pT(), event);
+          }
+
           // _fnlo_WPt_1j_AK8->fill(wBosonPt, event);
           // _fnlo_WPtJetPt_1j_AK8->fill(wBosonPt+finaljet_list_AK8[0].pT(), event);
 #endif
@@ -197,10 +205,10 @@ namespace Rivet {
           if(finaljet_list_AK8.size()==1) {
               _hist_JetPt_Exc_1j_AK8->fill(finaljet_list_AK8[0].pT(), weight);
               _hist_LepPtJetPt_Exc_1j_AK8->fill(pt0+finaljet_list_AK8[0].pT(), weight);
-#if USE_FNLO
+//#if USE_FNLO
               // _fnlo_JetPt_Exc_1j_AK8->fill(finaljet_list_AK8[0].pT(), event);
-              _fnlo_LepPtJetPt_Exc_1j_AK8->fill(pt0+finaljet_list_AK8[0].pT(), event);
-#endif
+              // _fnlo_LepPtJetPt_Exc_1j_AK8->fill(pt0+finaljet_list_AK8[0].pT(), event);
+//#endif
           }
           
       } // close the Wboson loop
@@ -262,8 +270,8 @@ namespace Rivet {
         //AK8 exclusive jet mult. grids
         // _fnlo_JetPt_Exc_1j_AK8->scale(crossec/picobarn/sumOfWeights());
         // _fnlo_JetPt_Exc_1j_AK8->exportgrid();
-        _fnlo_LepPtJetPt_Exc_1j_AK8->scale(crossec/picobarn/sumOfWeights());
-        _fnlo_LepPtJetPt_Exc_1j_AK8->exportgrid();
+        // _fnlo_LepPtJetPt_Exc_1j_AK8->scale(crossec/picobarn/sumOfWeights());
+        // _fnlo_LepPtJetPt_Exc_1j_AK8->exportgrid();
 #endif
 
         MCgrid::PDFHandler::CheckOutAnalysis(histoDir());
@@ -307,7 +315,7 @@ namespace Rivet {
       // MCgrid::gridPtr _fnlo_WPtJetPt_1j_AK8;
       //AK8 exclusive jet mult. grids
       // MCgrid::gridPtr _fnlo_JetPt_Exc_1j_AK8;
-      MCgrid::gridPtr _fnlo_LepPtJetPt_Exc_1j_AK8;
+      // MCgrid::gridPtr _fnlo_LepPtJetPt_Exc_1j_AK8;
 #endif
 
   }; //end class

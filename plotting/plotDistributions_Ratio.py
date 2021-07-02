@@ -18,23 +18,14 @@ unfolded data and other theory predictions
 '''
 ##################################################
 ### R21 (list num first, then denom)
-#numerator = 'W2J'
-#denominator = 'W1J'
-#tablenames = [ ['d57-x01-y01.merged','d56-x01-y01.merged'] ]
-# ### R32 (list num first, then denom)
-#numerator = 'W3J'
-#denominator = 'W2J'
-#tablenames = [ ['d58-x01-y01.merged','d57-x01-y01.merged'], ['d64-x01-y01.merged','d63-x01-y01.merged'] ]
-# ### R31 (list num first, then denom)
-numerator = 'W3J'
+numerator = 'W2J'
 denominator = 'W1J'
-tablenames = [ ['d58-x01-y01.merged','d56-x01-y01.merged'] ]
+tablenames = [ ['d57-x01-y01.merged','d56-x01-y01.merged'] ]
 ## --
-#pdfnames = ['CT10nlo', 'CT14nlo', 'NNPDF23_nlo', 'NNPDF30_nlo', 'NNPDF31_nnlo']
-pdfnames = ['CT14nlo']
+pdfnames = ['CT14nlo', 'NNPDF30_nlo', 'NNPDF31_nlo', 'HERAPDF20_N']
 ## --
 doErrors = True
-# doErrors = False
+#doErrors = False
 ## --
 # doNP = True
 doNP = False
@@ -176,22 +167,19 @@ for tablename in tablenames:
             nonpertSFs = np.ones(numBins)
         else:
             print ("\n~~~ Adding non-perturbative corrections! ~~~")
-            isNP = "-NP"
+            isNP = "-NPapplied"
             nonpertSFs = []
-            if (tablename[0] == 'd07-x01-y01.merged' and tablename[1] == 'd06-x01-y01.merged'): 
-                nonpertSFnum = [1.3896005897157113, 1.2470054856288724, 1.137700633319125, 1.0706067860636121, 1.0364868374388996, 1.0204210577848034, 1.0121440610542551, 1.0071749547041193, 1.0043442086436452, 1.0026876020828206]
-                nonpertSFdenom = [1.2010625918051203, 1.1298239392566556, 1.07133490626799, 1.0322962846450936, 1.0105480864823724, 0.9993642232331477, 0.9931152945868026, 0.9890435762337125, 0.9865012348803278, 0.9848357027014492]
-            if (tablename[0] == 'd07-x01-y01.merged' and tablename[1] == 'd31-x01-y01.merged'): 
-                nonpertSFnum = [1.3896005897157113, 1.2470054856288724, 1.137700633319125, 1.0706067860636121, 1.0364868374388996, 1.0204210577848034, 1.0121440610542551, 1.0071749547041193, 1.0043442086436452, 1.0026876020828206]
-                nonpertSFdenom = [1.19275844350739, 1.1199652421556099, 1.0589974205974122, 1.0173041320196443, 0.9934555951734685, 0.9808749675176636, 0.9736785761375525, 0.9688768894234097, 0.9657979786368535, 0.9637136791419829]
-            if (tablename[0] == 'd57-x01-y01.merged' and tablename[1] == 'd56-x01-y01.merged'): 
-                nonpertSFnum = [1.285717560676564, 1.1578183804295012, 1.0885000425493627, 1.0508123713199902, 1.03434786285872, 1.0273568362470915, 1.024286202584473, 1.0232033623310892, 1.0229147149114493]
-                nonpertSFdenom = [1.1011794317605685, 1.0899096172250768, 1.078483162968084, 1.0659008006921162, 1.053810096192782, 1.0420880619495763, 1.0290413747579634, 1.0146062990008113, 0.9980935928741425]
-            if (tablename[0] == 'd57-x01-y01.merged' and tablename[1] == 'd81-x01-y01.merged'): 
-                nonpertSFnum = [1.285717560676564, 1.1578183804295012, 1.0885000425493627, 1.0508123713199902, 1.03434786285872, 1.0273568362470915, 1.024286202584473, 1.0232033623310892, 1.0229147149114493]
-                nonpertSFdenom = [1.1010032257492965, 1.0898741520851927, 1.0785332788034736, 1.0659734773716554, 1.053827625966885, 1.041973526047908, 1.028679393484072, 1.013831966294646, 0.9966404959289775]
-            for i in range(int(numBins)):
-                nonpertSFs.append(nonpertSFnum[i]/nonpertSFdenom[i])
+            if (tablename[0] == 'd57-x01-y01.merged' and tablename[1] == 'd56-x01-y01.merged'):
+                ## fitting num and denom separately
+#                nonpertSFnum = [1.2143065829283297, 1.1541132805819672, 1.111386439794653, 1.082816412159742, 1.0636711831625145, 1.0497129346143452, 1.0394210837971538, 1.0322893766455512]
+#                nonpertSFdenom = [1.0873368443237184, 1.0597884175600603, 1.0387045233719077, 1.0234938961482543, 1.0125184112276442, 1.0038964584398657, 0.9970059154427833, 0.9917926005262271]
+                ## fitting ratio directly
+                nonpertSFs = [1.060067577288573, 1.051722811926179, 1.044003412939956, 1.0372626588348626, 1.0314047853899995, 1.0258515086571358, 1.020413976745724, 1.0152802984689289]
+
+            ## when fitting num and denom separately
+#            for i in range(int(numBins)):
+#                nonpertSFs.append(nonpertSFnum[i]/nonpertSFdenom[i])
+
             print("\nApplying non-pertrubative corrections:\n"+str(nonpertSFs))
 
         ##################################################################################
@@ -250,8 +238,11 @@ for tablename in tablenames:
             # xmax = hUnfRatio.GetXaxis().GetXmax()
         # else:
         # Get x-axis bounds from FastNLO distributions
-        xmin = binCenMEnum[0]-(binCenMEnum[1]-binCenMEnum[0])/2.
-        xmax = binCenMEnum[numBins-1]+(binCenMEnum[numBins-1]-binCenMEnum[numBins-2])/2.
+        # xmin = binCenMEnum[0]-(binCenMEnum[1]-binCenMEnum[0])/2.
+        # xmax = binCenMEnum[numBins-1]+(binCenMEnum[numBins-1]-binCenMEnum[numBins-2])/2.
+        # hard-coded:
+        xmin = 200.
+        xmax = 1400.
 
         ## Get y-bounds and titles depending on distribution
         ## Using linear y-axis for ratios
@@ -272,10 +263,10 @@ for tablename in tablenames:
                 title += ', Muon pT + Leading Jet pT'
                 binDataOffset = 1
             if (tablename[0] == 'd57-x01-y01.merged' and tablename[1] == 'd56-x01-y01.merged'):
-                ymax = 0.6
-                xtitle = 'Muon pT + Leading AK8 Jet pT [GeV]'
+                ymax = 1.1
+                xtitle = 'Muon p_{T} + Leading Jet p_{T} [GeV]'
                 title += ', Muon pT + Leading Jet pT'
-                binDataOffset = 1
+                binDataOffset = 3
             if (tablename[0] == 'd57-x01-y01.merged' and tablename[1] == 'd81-x01-y01.merged'):
                 ymax = 0.8
                 xtitle = 'Muon pT + Leading Jet pT [GeV]'
@@ -320,7 +311,7 @@ for tablename in tablenames:
             hSignalMCRatio.Draw("E same")
 
         # Make legend
-        leg1 = ROOT.TLegend(0.3,0.75,0.935,0.975)
+        leg1 = ROOT.TLegend(0.24,0.75,0.935,0.975)
         leg1.SetTextSize(0.027)
         if (doData):
             leg1.AddEntry(hUnfRatio, "Unfolded Data", "lp")
@@ -391,6 +382,8 @@ for tablename in tablenames:
             gr.SetMarkerStyle(20)
             gr.SetMarkerSize(0.7)
             ## -- Legend --
+            if (pdfname == 'HERAPDF20_N'):
+                pdfname = 'HERAPDF20_NLO'
             if (i == 0):
                 leg1.AddEntry(gr, "NLO QCD: ME+PDF("+pdfname+"), #alpha_{s }= "+str(round(alphas,3)), "lp")
             if ((round(alphas,3)) == 0.118):
@@ -403,11 +396,11 @@ for tablename in tablenames:
         ## Only plotting the lowest, central and highest ME+PDF variations for now
         for i, alphas in enumerate(alphasvalsMEPDF):
             if (i == 0):
-               grMEPDFlist[i].Draw('PEL same')
+               grMEPDFlist[i].Draw('PEZ same')
             if ((round(alphas,3)) == 0.118):
-               grMEPDFlist[i].Draw('PEL same')
+               grMEPDFlist[i].Draw('PEZ same')
             if (i == numVarMEPDF-1):
-               grMEPDFlist[i].Draw('PEL same')
+               grMEPDFlist[i].Draw('PEZ same')
         ## And draw legend
         leg1.Draw("same")
 
@@ -480,7 +473,8 @@ for tablename in tablenames:
         htemp1.GetYaxis().SetLabelSize(0.06)
         # htemp1.GetYaxis().SetRangeUser(0.01, 2.15)
         # htemp1.GetYaxis().SetRangeUser(0.51, 1.49)
-        htemp1.GetYaxis().SetRangeUser(0.701, 1.299)
+        # htemp1.GetYaxis().SetRangeUser(0.701, 1.299)
+        htemp1.GetYaxis().SetRangeUser(0.851, 1.149)
         htemp1.SetTitle("")
         htemp1.Draw()
 
@@ -553,8 +547,8 @@ for tablename in tablenames:
             grMCtoData1.SetLineWidth(2)
             grMCtoData1.SetLineStyle(1)
             grMCtoData1.SetMarkerColor(ROOT.kOrange)
-            grMCtoData1.SetMarkerStyle(20)
-            grMCtoData1.SetMarkerSize(0.7)
+            grMCtoData1.SetMarkerStyle(24)
+            grMCtoData1.SetMarkerSize(0.95)
 
             grMCtoData2.SetLineColorAlpha(4, 1.)
             grMCtoData2.SetLineWidth(2)
@@ -577,10 +571,10 @@ for tablename in tablenames:
             grMCtoData4.SetMarkerStyle(20)
             grMCtoData4.SetMarkerSize(0.7)
 
-            grMCtoData2.Draw('PE same')
-            grMCtoData3.Draw('PE same')
-            grMCtoData4.Draw('PE same')
-            grMCtoData1.Draw('PE same') #draw this one on top
+            grMCtoData2.Draw('PEZ same')
+            grMCtoData3.Draw('PEZ same')
+            grMCtoData4.Draw('PEZ same')
+            grMCtoData1.Draw('PEZ same') #draw this one on top
 
         ##################################################################################
 

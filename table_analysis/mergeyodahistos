@@ -1,0 +1,285 @@
+#! /usr/bin/env python
+
+"""\
+%prog [-o outfile] <yodafile1>[:<scale1>] <yodafile2>[:<scale1>] ...
+"""
+
+import yoda, optparse, sys, math, re
+
+parser = optparse.OptionParser(usage=__doc__)
+parser.add_option("-o", "--output", default="-", dest="OUTPUT_FILE", metavar="PATH",
+                  help="write output to specified path")
+parser.add_option("--s1d-mode", "--s1dmode", default="assume_mean", dest="S1D_MODE", metavar="MODE",
+                  help="choose strategy for combining Scatter1D objects: one of 'first', 'combine', 'assume_mean', 'add'")
+parser.add_option("--s2d-mode", "--s2dmode", default="assume_mean", dest="S2D_MODE", metavar="MODE",
+                  help="choose strategy for combining Scatter2D objects: one of 'first', 'combine', 'assume_mean', 'add'")                  
+# parser.add_option("--type-mismatch-mode", default="scatter", dest="TYPE_MISMATCH_MODE", metavar="MODE",
+#                   help="choose strategy for combining objects whose types mismatch: one of 'first', 'scatter'")
+parser.add_option("--add", "--stack", action="store_true", default=False, dest="STACK",
+                  help="force simple stacking (also forces all scatter modes to 'add')")
+parser.add_option("--no-veto-empty", action="store_false", default=True, dest="VETO_EMPTY",
+                  help="disable the removal of empty (sumW=0) data objects _before_ applying merge heuristics. You probably want the default!")
+opts, fileargs = parser.parse_args()
+
+### Some Notes, First:
+### 1) This script can be/is used to combine multiple statistically independent runs of the same data objects into one high-statistics run
+### 2) When combining histograms, we first have to undo the normalization factors that are applied to each when Rivet finishes its analysis run
+###    This script does that, merges the histograms, and then re-applies a newly-calculated normalization factor, derived from the indiv. normalizations
+###    These input normalizations should be of the form crossSection/sumOfAllWeights such that each of the input files contains physical cross sections
+###    ^^^ Is this the correct approach for differing cross sections (each of the runs estimates at the cross section shoudl be treated equally...)
+###    But wait, the final merged histo normalization takes all of these into account and would form a weighted average???
+### 3) The merging mode for Scatter1D, Scatter2D's should be "assume_mean" by default, which assumes/requires equal run sizes (#events) for each file
+###    We need external assumptions because these Scatter objects don't contain the "sufficient statistical information" required
+
+## Include scatters in "add" mode
+if opts.STACK:
+    print(" ~~~ opts.STACK is turned on! ~~~")
+    opts.S1D_MODE = "add"
+    opts.S2D_MODE = "add"
+
+print("\n ----- Reading in analysis objects! ----- \n")
+## Put the incoming objects into a dict from each path to a list of histos and scalings
+analysisobjects_in = {}
+for fa in fileargs:
+    filename, scale = fa, 1.0
+    if ":" in fa:
+        try:
+            filename, scale = fa.rsplit(":", 1)
+            scale = float(scale)
+        except:
+            sys.stderr.write("Error processing arg '%s' with file:scale format\n" % fa)
+
+    print(">>>>> filename = "+str(filename))
+    print("scale = "+str(scale))
+
+    # yoda.read() returns a python dictionary of the histogram path names 
+    # and corresponding Histo1D, etc. AnalysisObject's
+    aos = yoda.read(filename)
+
+    # Sort the key-value pairs by key when iterating over 
+    # the dicitonary (dictionary is unsorted)
+    # aopath is path for each histo
+    # ao is the Histo1D, etc. YODA object associated to that path (the AnalysisObject)
+    for aopath, ao in sorted(aos.iteritems()):
+        # Attach the given scale to each analysis object in the file
+        ao.setAnnotation("yodamerge_scale", scale)
+        # Attach each analysis object from each file to the same path (the key)
+        analysisobjects_in.setdefault(aopath, []).append(ao)
+
+    print("")
+
+print(" ----- Analyzing "+str(len(analysisobjects_in))+" sets of analysis objects! ----- \n")
+analysisobjects_out = {}
+for p, aos in sorted(analysisobjects_in.iteritems()):
+
+    print(">>>>> p = "+str(p))
+    print("aos = "+str(aos))
+
+    ## Identify the canonical aotype being handled from the type of the first entry in aos
+    ## aos should be the list of all of the same histogram from each of the different files
+    aotype = type(aos[0])
+
+    ## Check that all the types match
+    ## This essentially checks that all of the histograms in each file are 
+    ## pushed back correctly/in the same order, and that these histograms are of the same type
+    if not all(type(ao) is aotype for ao in aos):
+        msg = "Warning! Cannot merge mismatched analysis object types for path %s " % p
+        # just make the code exit if this happens
+        sys.exit(0)
+        # some other options in this next block
+        # scatter_fail = False
+        # if opts.TYPE_MISMATCH_MODE == "scatter":
+        #     saos = []
+        #     for ao in aos:
+        #         sao = ao.mkScatter()
+        #         sao.setAnnotation("yodamerge_scale", ao.annotation("yodamerge_scale"))
+        #         saos.append(sao)
+        #     saotype = type(saos[0])
+        #     msg += "Converting to %ss" % saotype.__name__
+        #     if all(type(sao) is saotype for sao in saos):
+        #         sys.stderr.write(msg + "\n")
+        #         aos = saos
+        #         aotype = saotype
+        #     else:
+        #         msg += "... failed, "
+        #         scatter_fail = True
+        # if opts.TYPE_MISMATCH_MODE == "first" or scatter_fail:
+        #     sys.stderr.write(msg + "Returning first object\n")
+        #     analysisobjects_out[p] = aos[0]
+        #     continue
+
+    ## Remove empty fillable data objects, to avoid gotchas where e.g. histos are normalised and hence
+    ## ScaledBy should be set... but isn't because the emptiness blocked rescaling to finite area
+    if opts.VETO_EMPTY:
+        if aotype in (yoda.Counter, yoda.Histo1D, yoda.Histo2D, yoda.Profile1D, yoda.Profile2D):
+            aos_nonzero = [ao for ao in aos if ao.sumW() != 0] #< possible that this doesn't mean no fills :-/
+            ## Just output the first histo if they are all empty
+            if not aos_nonzero:
+                analysisobjects_out[p] = aos[0]
+                continue
+            ## Reset aos to only contain non-empty ones
+            aos = aos_nonzero
+
+    # ---------------------------------------------------------------------------------------------------
+    ## Counter, Histo and Profile (i.e. Fillable) merging -----------------------------------------------
+    ## could alter the code such that we only look at 1D histos...
+    if aotype in (yoda.Counter, yoda.Histo1D, yoda.Histo2D, yoda.Profile1D, yoda.Profile2D):
+
+        ## Identify a target rescaling factor from the 1/scalefactor-weighted norms of each run
+        rescale = None
+        if len(aos) > 1 and opts.STACK:
+            pass # we're in dumb stacking mode
+        elif all("ScaledBy" in ao.annotations for ao in aos): #use of ScaledBy attribute to determine if histograms have been normalized
+            # look at scale factors for each AnalysisObject
+            for ao in aos:
+                print("ao.annotation('ScaledBy') = "+str( float(ao.annotation("ScaledBy")) ))
+            rescale = 1.0 / sum( float(ao.annotation("yodamerge_scale"))/float(ao.annotation("ScaledBy")) for ao in aos )
+            print("rescale = "+str(rescale))
+        elif all("ScaledBy" not in ao.annotations for ao in aos):
+            pass
+        else:
+            sys.stderr.write("Warning! Abandoning normalized merge of path %s because some but not all inputs have ScaledBy attributes\n" % p)
+
+        ## Now that the normalization-identifying heuristic is done, apply user scalings and undo the normalization scaling if appropriate
+        ## scaleW(weight): Rescale the weights in this counter by the input "weight"
+        for ao in aos:
+            ao.scaleW( float(ao.annotation("yodamerge_scale")) )
+            # undo the scale factor normalization for each histo using its respective scale factor
+            # each of these histos can have different normalizations (depending on #events/sumW and generator crossSection)
+            # does the annotation("ScaledBy") also include the scaling just in the line above? (it should not)
+            # we are trying to un-do the normalization that the file came with
+            if rescale:
+                ao.scaleW( 1.0/float(ao.annotation("ScaledBy")) )
+
+        ## Make a copy of the (scaled & unnormalized) first object as the basis for the output
+        ## and merge for histograms (including weights, normalization, and user scaling)
+        ao_out = aos[0].clone()
+        ao_out.rmAnnotation("yodamerge_scale")
+        for ao in aos[1:]:
+            ao_out += ao
+        # now rescale the final histogram using the combined normalization 
+        # from each of the component histograms
+        if rescale:
+            ao_out.scaleW(rescale)
+
+    # ---------------------------------------------------------------------------------------------------
+    ## Merge for Scatter1D's, assuming equal run sizes, and applying user scaling -----------------------
+    else:
+
+        # find out what the input mode for merging Scatter's is
+        print("opts.S1D_MODE = "+str(opts.S1D_MODE))
+        print("opts.S2D_MODE = "+str(opts.S2D_MODE))
+
+        ## Make a copy of the first object as the basis for merging (suitable for all Scatter types)
+        ao_out = aos[0].clone()
+        ao_out.rmAnnotation("yodamerge_scale")
+
+        ## If there's only one object, there's no need to do any combining
+        if len(aos) == 1:
+            pass
+
+        elif aotype is yoda.Scatter1D:
+
+            ## Use asymptotic mean+stderr convergence statistics
+            if opts.S1D_MODE in ["assume_mean", "add"]:
+
+                msg = "Warning! Scatter1D %s merge assumes asymptotic statistics and equal run sizes" % p
+                if any(float(ao.annotation("yodamerge_scale")) != 1.0 for ao in aos):
+                    msg += " (+ user scaling)"
+                sys.stderr.write(msg + "\n")
+
+                npoints = len(ao_out.points)
+                for i in xrange(npoints):
+                    val_i = ep_i = em_i = scalesum = 0.0
+                    for ao in aos:
+                        scale = float(ao.annotation("yodamerge_scale"))
+                        scalesum += scale
+                        val_i += scale * ao.points[i].x
+                        ep_i += (scale * ao.points[i].xErrs[0])**2
+                        em_i += (scale * ao.points[i].xErrs[1])**2
+                    if opts.S1D_MODE == "assume_mean":
+                        val_i /= scalesum
+                        ep_i = math.sqrt(ep_i) / scalesum
+                        em_i = math.sqrt(em_i) / scalesum
+                    ao_out.points[i].x = val_i
+                    ao_out.points[i].xErrs = (ep_i, em_i)
+
+            ## Add more points to the output scatter
+            elif opts.S1D_MODE == "combine":
+                for ao in aos[1:]:
+                    ao_out.combineWith(ao)
+
+            ## Just return the first AO unmodified & unmerged
+            elif opts.S1D_MODE == "first":
+                pass
+
+            else:
+                raise Exception("Unknown Scatter1D merging mode:" + opts.S1D_MODE)
+
+        ## Merge for Scatter2D (assuming equal run sizes, and applying user scaling)
+        elif aotype is yoda.Scatter2D:
+
+            ## Use asymptotic mean+stderr convergence statistics
+            if opts.S2D_MODE in ["assume_mean", "add"]:
+
+                msg = "WARNING: Scatter2D %s merge assumes asymptotic statistics and equal run sizes" % p
+                if any(float(ao.annotation("yodamerge_scale")) != 1.0 for ao in aos):
+                    msg += " (+ user scaling)"
+                sys.stderr.write(msg + "\n")
+
+                npoints = len(ao_out.points)
+                for i in xrange(npoints):
+                    val_i = ep_i = em_i = scalesum = 0.0
+                    for ao in aos:
+                        scale = float(ao.annotation("yodamerge_scale"))
+                        scalesum += scale
+                        val_i += scale * ao.points[i].y
+                        ep_i += (scale * ao.points[i].yErrs[0])**2
+                        em_i += (scale * ao.points[i].yErrs[1])**2
+                    if opts.S2D_MODE == "assume_mean":
+                        val_i /= scalesum
+                        ep_i = math.sqrt(ep_i) / scalesum
+                        em_i = math.sqrt(em_i) / scalesum
+                    ao_out.points[i].y = val_i
+                    ao_out.points[i].yErrs = (ep_i, em_i)
+
+            ## Add more points to the output scatter
+            elif opts.S2D_MODE == "combine":
+                for ao in aos[1:]:
+                    ao_out.combineWith(ao)
+
+            ## Just return the first AO unmodified & unmerged
+            elif opts.S2D_MODE == "first":
+                pass
+
+            else:
+                raise Exception("Unknown Scatter2D merging mode:" + opts.S2D_MODE)
+        
+        ## Other data types (just warn, and write out the first object)
+        else:
+            sys.stderr.write("Warning! Analysis object %s of type %s will not be merged\n" % (p, str(aotype)))
+
+    # ---------------------------------------------------------------------------------------------------
+
+    ## Put the output AO into the output dict
+    analysisobjects_out[p] = ao_out
+
+    print("")
+
+# Write output
+print("\n ----- Writing "+str(len(analysisobjects_out)) +" analysis objects in YODA output... ----- \n")
+
+# Give writeYODA a sorted list of dictionary values
+# writeYODA function takes the dictionary/list and writes it out to screen or to a file
+# The order is important if we want to compare the merged YODA to the other YODA's
+yoda.writeYODA(sorted(analysisobjects_out.values()), opts.OUTPUT_FILE) #this works but is not order we want (it sorts by the name of the AO's, not the paths)
+
+## NOTE: the current order of readout is ordered by looking at the AnalysisObject type 
+## (Cannot figure out how to order the AO's by their path name, due to format of writeYODA function)
+## All of the AO's out of order are superfluous to the analysis (my Histo1D's are the ones that will give the PS, NP corrections)
+## Maybe the way the rivet-mkhtml script read the files, it doesn't matter, maybe what does matter is the fact that all of the plots are there
+## e.g.
+## yoda.writeYODA(sorted(analysisobjects_out.items()), opts.OUTPUT_FILE) #this is the order we want, but writeYODA can't handle format!
+## EDIT: created my own macro "makerivetplots" which looks at the input AO's in a sorted order for all files, so maybe we have solved this problem
+
+print("Done!\n")

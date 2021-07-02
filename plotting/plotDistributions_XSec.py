@@ -19,18 +19,15 @@ and other theory predictions
 ##################################################
 processes = ['W1J']
 tablenames = ['d56-x01-y01.merged']
-#processes = ['W2J']
-#tablenames = ['d57-x01-y01.merged', 'd63-x01-y01.merged']
-#processes = ['W3J']
-#tablenames = ['d58-x01-y01.merged', 'd64-x01-y01.merged']
+# processes = ['W2J']
+# tablenames = ['d57-x01-y01.merged']
 ## --
-#pdfnames = ['CT10nlo', 'CT14nlo', 'NNPDF23_nlo', 'NNPDF30_nlo', 'NNPDF31_nnlo']
-pdfnames = ['CT14nlo']
+pdfnames = ['CT14nlo', 'NNPDF30_nlo', 'NNPDF31_nlo', 'HERAPDF20_N']
 ## --
 doErrors = True
-# doErrors = False
+#doErrors = False
 ## --
-# doNP = True
+#doNP = True
 doNP = False
 ## --
 doData = True
@@ -145,21 +142,13 @@ for process in processes:
                 nonpertSFs = np.ones(numBins)
             else:
                 print ("\n~~~ Adding non-perturbative corrections! ~~~")
-                isNP = "-NP"
+                isNP = "-NPapplied"
                 # W+1J
-                if (tablename == 'd06-x01-y01.merged'): 
-                    nonpertSFs = [1.2010625918051203, 1.1298239392566556, 1.07133490626799, 1.0322962846450936, 1.0105480864823724, 0.9993642232331477, 0.9931152945868026, 0.9890435762337125, 0.9865012348803278, 0.9848357027014492]
-                if (tablename == 'd31-x01-y01.merged'): 
-                    nonpertSFs = [1.19275844350739, 1.1199652421556099, 1.0589974205974122, 1.0173041320196443, 0.9934555951734685, 0.9808749675176636, 0.9736785761375525, 0.9688768894234097, 0.9657979786368535, 0.9637136791419829]
                 if (tablename == 'd56-x01-y01.merged'): 
-                    nonpertSFs = [1.1011794317605685, 1.0899096172250768, 1.078483162968084, 1.0659008006921162, 1.053810096192782, 1.0420880619495763, 1.0290413747579634, 1.0146062990008113, 0.9980935928741425]
-                if (tablename == 'd81-x01-y01.merged'): 
-                    nonpertSFs = [1.1010032257492965, 1.0898741520851927, 1.0785332788034736, 1.0659734773716554, 1.053827625966885, 1.041973526047908, 1.028679393484072, 1.013831966294646, 0.9966404959289775]
+                    nonpertSFs = [1.0669975256706226, 1.0180740407938955, 1.003429262670792, 0.9975915151870831, 0.9954401505789361]
                 # W+2J
-                if (tablename == 'd07-x01-y01.merged'): 
-                    nonpertSFs = [1.3896005897157113, 1.2470054856288724, 1.137700633319125, 1.0706067860636121, 1.0364868374388996, 1.0204210577848034, 1.0121440610542551, 1.0071749547041193, 1.0043442086436452, 1.0026876020828206]
                 if (tablename == 'd57-x01-y01.merged'): 
-                    nonpertSFs = [1.285717560676564, 1.1578183804295012, 1.0885000425493627, 1.0508123713199902, 1.03434786285872, 1.0273568362470915, 1.024286202584473, 1.0232033623310892, 1.0229147149114493]
+                    nonpertSFs = [1.077566633105699, 0.9977636710165873, 0.9841403236031283, 0.980882310651964, 0.9801803073066212]
                 print("\nApplying non-pertrubative corrections:\n"+str(nonpertSFs))
 
             ##################################################################################
@@ -225,8 +214,11 @@ for process in processes:
                 # xmax = hUnf.GetXaxis().GetXmax()
             # else:
             # Get x-axis bounds from FastNLO distributions
-            xmin = binCenME[0]-(binCenME[1]-binCenME[0])/2.
-            xmax = binCenME[numBins-1]+(binCenME[numBins-1]-binCenME[numBins-2])/2.
+            # xmin = binCenME[0]-(binCenME[1]-binCenME[0])/2.
+            # xmax = binCenME[numBins-1]+(binCenME[numBins-1]-binCenME[numBins-2])/2.
+            # hard-coded:
+            xmin = 200.
+            xmax = 1400.
 
             ## Get y-bounds and titles depending on distribution
             ## Note: binDataOffset only applies to the histograms from the WJets analysis code,
@@ -247,11 +239,11 @@ for process in processes:
                     ytitle = 'd#sigma/dp_{T} [pb/GeV]'
                     binDataOffset = 1
                 elif (tablename == 'd56-x01-y01.merged'):
-                    ymin = 0.00009
-                    ymax = 0.45
+                    ymin = 0.00003
+                    ymax = 6.0
                     xtitle = 'Muon p_{T} + Leading Jet p_{T} [GeV]'
                     ytitle = 'd#sigma/dp_{T} [pb/GeV]'
-                    binDataOffset = 1
+                    binDataOffset = 3
                 elif (tablename == 'd81-x01-y01.merged'):
                     ymin = 0.00005
                     ymax = 0.45
@@ -267,10 +259,10 @@ for process in processes:
                     binDataOffset = 1
                 elif (tablename == 'd57-x01-y01.merged'):
                     ymin = 0.00002
-                    ymax = 0.08
+                    ymax = 1.7
                     xtitle = 'Muon p_{T} + Leading Jet p_{T} [GeV]'
                     ytitle = 'd#sigma/dp_{T} [pb/GeV]'
-                    binDataOffset = 1
+                    binDataOffset = 3
                 elif (tablename == 'd63-x01-y01.merged'):
                     ymin = 0.00001
                     ymax = 0.08
@@ -309,7 +301,7 @@ for process in processes:
                 # hWJetsLOMLM.Draw("E same")
 
             # Make legend
-            leg1 = ROOT.TLegend(0.3,0.75,0.935,0.975)
+            leg1 = ROOT.TLegend(0.24,0.75,0.935,0.975)
             leg1.SetTextSize(0.027)
             if (doData):
                 leg1.AddEntry(hUnf, "Unfolded Data", "lp")
@@ -380,6 +372,8 @@ for process in processes:
                 gr.SetMarkerStyle(20)
                 gr.SetMarkerSize(0.7)
                 ## -- Legend --
+                if (pdfname == 'HERAPDF20_N'):
+                    pdfname = 'HERAPDF20_NLO'
                 if (i == 0):
                     leg1.AddEntry(gr, "NLO QCD: ME+PDF("+pdfname+"), #alpha_{s }= "+str(round(alphas,3)), "lp")
                 if ((round(alphas,3)) == 0.118):
@@ -392,11 +386,11 @@ for process in processes:
             ## Only plotting the lowest, central and highest ME+PDF variations for now
             for i, alphas in enumerate(alphasvalsMEPDF):
                 if (i == 0):
-                    grMEPDFlist[i].Draw('PEL same')
+                    grMEPDFlist[i].Draw('PEZ same')
                 if ((round(alphas,3)) == 0.118):
-                    grMEPDFlist[i].Draw('PEL same')
+                    grMEPDFlist[i].Draw('PEZ same')
                 if (i == numVarMEPDF-1):
-                    grMEPDFlist[i].Draw('PEL same')
+                    grMEPDFlist[i].Draw('PEZ same')
             ## And draw legend
             leg1.Draw("same")
 
@@ -461,8 +455,8 @@ for process in processes:
             htemp1.GetYaxis().SetTitleOffset(0.45)
             htemp1.GetYaxis().SetTitleSize(0.09)
             htemp1.GetYaxis().SetLabelSize(0.06)
-            # htemp1.GetYaxis().SetRangeUser(0.01, 2.15)
-            htemp1.GetYaxis().SetRangeUser(0.51, 1.49)
+            htemp1.GetYaxis().SetRangeUser(0.01, 2.15)
+#            htemp1.GetYaxis().SetRangeUser(0.51, 1.49)
             htemp1.SetTitle("")
             htemp1.Draw()
 
@@ -535,8 +529,8 @@ for process in processes:
                 grMCtoData1.SetLineWidth(2)
                 grMCtoData1.SetLineStyle(1)
                 grMCtoData1.SetMarkerColor(ROOT.kOrange)
-                grMCtoData1.SetMarkerStyle(20)
-                grMCtoData1.SetMarkerSize(0.7)
+                grMCtoData1.SetMarkerStyle(24)
+                grMCtoData1.SetMarkerSize(0.95)
 
                 grMCtoData2.SetLineColorAlpha(4, 1.)
                 grMCtoData2.SetLineWidth(2)
@@ -559,10 +553,10 @@ for process in processes:
                 grMCtoData4.SetMarkerStyle(20)
                 grMCtoData4.SetMarkerSize(0.7)
 
-                grMCtoData2.Draw('PE same')
-                grMCtoData3.Draw('PE same')
-                grMCtoData4.Draw('PE same')
-                grMCtoData1.Draw('PE same') #draw this one on top
+                grMCtoData2.Draw('PEZ same')
+                grMCtoData3.Draw('PEZ same')
+                grMCtoData4.Draw('PEZ same')
+                grMCtoData1.Draw('PEZ same') #draw this one on top
 
             ##################################################################################
 

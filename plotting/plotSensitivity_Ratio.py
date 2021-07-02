@@ -8,26 +8,16 @@ from array import array
 import ROOT
 ##################################################
 ### R21 (list num first, then denom)
-# numerator = 'W2J'
-# denominator = 'W1J'
-# tablenames = [ ['d57-x01-y01.merged','d56-x01-y01.merged'] ]
-# variables = [ ["LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold", "LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold"] ]
-### R32 (list num first, then denom)
-# numerator = 'W3J'
-# denominator = 'W2J'
-# tablenames = [ ['d58-x01-y01.merged','d57-x01-y01.merged'], ['d64-x01-y01.merged','d63-x01-y01.merged'] ]
-# variables = [ ["LepPtPlusLeadingJetAK8Pt_Zinc3jet_TUnfold", "LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold"], ["LepPtPlusHT2over2AK8_Zinc3jet_TUnfold", "LepPtPlusHT2over2AK8_Zinc2jet_TUnfold"] ]
-### R31 (list num first, then denom)
-numerator = 'W3J'
+numerator = 'W2J'
 denominator = 'W1J'
-tablenames = [ ['d58-x01-y01.merged','d56-x01-y01.merged'] ]
-variables = [ ["LepPtPlusLeadingJetAK8Pt_Zinc3jet_TUnfold", "LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold"] ]
+tablenames = [ ['d57-x01-y01.merged','d56-x01-y01.merged'] ]
+variables = [ ["LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold", "LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold"] ]
 ## --
 #pdfnames = ['CT10nlo', 'CT14nlo', 'NNPDF23_nlo', 'NNPDF30_nlo', 'NNPDF31_nnlo']
 pdfnames = ['CT14nlo']
 ## --
 doSyst = True
-# doSyst = False
+#doSyst = False
 ## --
 #doCutoff = True
 doCutoff = False
@@ -111,7 +101,7 @@ for iTab, tablename in enumerate(tablenames):
                 binDataOffset = 1
             if (tablename[0] == 'd57-x01-y01.merged' and tablename[1] == 'd56-x01-y01.merged'):
                 xtitle = 'Muon pT + Leading AK8 Jet pT [GeV]'
-                binDataOffset = 1
+                binDataOffset = 3
             if (tablename[0] == 'd57-x01-y01.merged' and tablename[1] == 'd81-x01-y01.merged'):
                 xtitle = 'Muon pT + Leading Jet pT [GeV]'
                 binDataOffset = 1
@@ -218,9 +208,9 @@ for iTab, tablename in enumerate(tablenames):
             # procLatex.DrawLatex(0.58, legLowY-0.1, wtitle)
             procLatex.DrawLatex(0.60, 0.18, wtitle)
 
-        line2 = ROOT.TLine(binCenMEnum[0], 1., binCenMEnum[int(numBins)-1], 1.);
-        line2.SetLineColor(ROOT.kBlack);
-        line2.SetLineWidth(1);
+        line2 = ROOT.TLine(binCenMEnum[0], 1., binCenMEnum[int(numBins)-1], 1.)
+        line2.SetLineColor(ROOT.kBlack)
+        line2.SetLineWidth(1)
         line2.Draw()
 
         ## Keeping the graphs in a list allows us to draw multiple on canvas
@@ -322,6 +312,14 @@ for iTab, tablename in enumerate(tablenames):
             hUnfRatio = fRatio.Get("UnfXSecRatio_Central")
             hTotCovMatrix = fRatio.Get("CovTotSyst")
 
+            # check if input distribution has NaN values
+            # print("\nquick check on dist:")
+            for i in range (1, hUnfRatio.GetNbinsX()+1):
+                if ( math.isnan( hUnfRatio.GetBinContent(i) ) ):
+                    hUnfRatio.SetBinContent(i, 0.0)
+                    hUnfRatio.SetBinError(i, 0.0)
+                # print("bin #"+str(i)+" ("+str(hUnfRatio.GetBinLowEdge(i))+", "+str(hUnfRatio.GetXaxis().GetBinUpEdge(i))+")"+": "+str(hUnfRatio.GetBinContent(i)))
+
             # make histograms for showing stat. and stat.+syst. uncertainties
             hStatError = hUnfRatio.Clone()
             hTotExpError = hUnfRatio.Clone()
@@ -371,6 +369,7 @@ for iTab, tablename in enumerate(tablenames):
             leg2.AddEntry(hStatError, "Experimental Uncertainty (Stat.)", "lpe")
             leg2.AddEntry(hTotExpError, "Experimental Uncertainty (Stat.+Syst.)", "lpe")
             
+            print("")
 
 
 
