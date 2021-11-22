@@ -20,24 +20,26 @@ os.system("mkdir -p "+outputDir)
 
 #################
 
-variables = ["FirstJetPt_Zinc1jet_TUnfold", "FirstJetAbsRapidity_Zinc1jet_TUnfold", "dPhiLepJet1_Zinc1jet_TUnfold",
+variables = [
+             "FirstJetPt_Zinc1jet_TUnfold", "FirstJetAbsRapidity_Zinc1jet_TUnfold", "dPhiLepJet1_Zinc1jet_TUnfold",
              "SecondJetPt_Zinc2jet_TUnfold", "SecondJetAbsRapidity_Zinc2jet_TUnfold", "dPhiLepJet2_Zinc2jet_TUnfold",
+             "dPhiJets_Zinc2jet_TUnfold", "dRapidityJets_Zinc2jet_TUnfold", "dRJets_Zinc2jet_TUnfold", "diJetMass_Zinc2jet_TUnfold",
+             # ---
              "FirstJetAK8Pt_Zinc1jet_TUnfold", "FirstJetAK8AbsRapidity_Zinc1jet_TUnfold", "dPhiLepJet1AK8_Zinc1jet_TUnfold",
              "SecondJetAK8Pt_Zinc2jet_TUnfold", "SecondJetAK8AbsRapidity_Zinc2jet_TUnfold", "dPhiLepJet2AK8_Zinc2jet_TUnfold",
-             "dRapidityJets_Zinc2jet_TUnfold", "dRapidityJetsAK8_Zinc2jet_TUnfold",
+             "dPhiJetsAK8_Zinc2jet_TUnfold", "dRapidityJetsAK8_Zinc2jet_TUnfold", "dRJetsAK8_Zinc2jet_TUnfold", "diJetAK8Mass_Zinc2jet_TUnfold",
              "dRLepCloseJetCo300dR04_Zinc1jet_TUnfold", "dRLepCloseJetCo500dR04_Zinc1jet_TUnfold",
-             "LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold", "LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold"
+             # ---
+             "LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold", "LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold", "LepPtPlusLeadingJetAK8Pt_Zinc3jet_TUnfold",
+             "LepPtPlusLeadingJetAK8Pt_Zexc1jet_TUnfold", "LepPtPlusLeadingJetAK8Pt_Zexc2jet_TUnfold",
+             "LepPtPlusHT2over2AK8_Zinc2jet_TUnfold", "LepPtPlusHT2over2AK8_Zinc3jet_TUnfold"
             ]
 
-#variables = ["LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold", "LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold"]
+# variables = ["FirstJetPt_Zinc1jet_TUnfold"]
 
-# full syst
-#names = ["Central", "PUUp", "PUDown", "JESUp", "JESDown", "XSECUp", "XSECDown", "JERUp", "JERDown", "LepSFUp", "LepSFDown", "BtagSFUp", "BtagSFDown", "L1PrefireUp", "L1PrefireDown", "LumiUp", "LumiDown"]
-#namesLegend = ["Pileup", "Jet Energy Scale", "BG Cross Section", "Jet Energy Resolution", "Muon Efficiency SFs", "B-Tagging SFs", "L1 Prefiring", "Luminosity"]
-
-# 15 january 21 -- main one
-names = ["Central", "PUUp", "PUDown", "JESUp", "JESDown", "XSECUp", "XSECDown", "JERUp", "JERDown", "LepSFUp", "LepSFDown", "L1PrefireUp", "L1PrefireDown", "LumiUp", "LumiDown"]
-namesLegend = ["Pileup", "Jet Energy Scale", "Background Cross Section", "Jet Energy Resolution", "Muon Efficiency", "L1 Prefiring", "Luminosity"]
+# Full systematics
+names = ["Central", "PUUp", "PUDown", "JESUp", "JESDown", "XSECUp", "XSECDown", "JERUp", "JERDown", "LepSFUp", "LepSFDown", "L1PrefireUp", "L1PrefireDown", "LumiUp", "LumiDown", "Unfolding", "Unfolding"]
+namesLegend = ["Pileup Modeling", "Jet Energy Scale", "Background Normalization", "Jet Energy Resolution", "Muon Selection Efficiency", "L1 Prefiring Effect", "Luminosity", "Unfolding Procedure"]
 
 # Central, JES
 # names = ["Central", "JESUp", "JESDown"]
@@ -59,8 +61,8 @@ doGenRecoComp = True
 
 ###########################################################
 
-ROOT.gStyle.SetHatchesSpacing(0.45);
-ROOT.gStyle.SetHatchesLineWidth(1);
+ROOT.gStyle.SetHatchesSpacing(0.45)
+ROOT.gStyle.SetHatchesLineWidth(1)
 
 numVar = len(variables)
 numNames = len(names)
@@ -68,22 +70,27 @@ numNames = len(names)
 print ("\nBegin!\n")
 for iVar, variable in enumerate(variables):
 
+    # chop off underflow and overflow bins kept in the unfolding for migrations
     if (variable == "FirstJetPt_Zinc1jet_TUnfold" or variable == "SecondJetPt_Zinc2jet_TUnfold"):
-        chopLeadingBins = 2
+        chopLeadingBins = 1
         chopEndingBins = 1
     elif (variable == "FirstJetAK8Pt_Zinc1jet_TUnfold" or variable == "SecondJetAK8Pt_Zinc2jet_TUnfold"):
         chopLeadingBins = 1
-        if (variable == "FirstJetAK8Pt_Zinc1jet_TUnfold"):
-            chopEndingBins = 1
-        else:
-            chopEndingBins = 2
+        chopEndingBins = 1
+    elif (variable == "dRJets_Zinc2jet_TUnfold" or variable == "dRJetsAK8_Zinc2jet_TUnfold"):
+        chopEndingBins = 1
+    elif (variable == "diJetAK8Mass_Zinc2jet_TUnfold" or variable == "diJetMass_Zinc2jet_TUnfold"):
+        chopEndingBins = 1
     elif (variable == "dRLepCloseJetCo300dR04_Zinc1jet_TUnfold" or variable == "dRLepCloseJetCo500dR04_Zinc1jet_TUnfold"):
         if (variable == "dRLepCloseJetCo300dR04_Zinc1jet_TUnfold"):
             chopEndingBins = 2
         else:
             chopEndingBins = 1
-    elif (variable == "LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold" or variable == "LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold"):
+    elif (variable == "LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold" or variable == "LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold" or variable == "LepPtPlusLeadingJetAK8Pt_Zinc3jet_TUnfold" or variable == "LepPtPlusLeadingJetAK8Pt_Zexc1jet_TUnfold" or variable == "LepPtPlusLeadingJetAK8Pt_Zexc2jet_TUnfold"):
         chopLeadingBins = 3
+        chopEndingBins = 1
+    elif (variable == "LepPtPlusHT2over2AK8_Zinc2jet_TUnfold" or variable == "LepPtPlusHT2over2AK8_Zinc3jet_TUnfold"):
+        chopLeadingBins = 2
         chopEndingBins = 1
     else:
         chopLeadingBins = 0
@@ -206,8 +213,8 @@ for iVar, variable in enumerate(variables):
 
     if (numNames > 1):
         j = 0
-        colors = [ROOT.kAzure+8, ROOT.kViolet+1, ROOT.kRed+1,
-                  ROOT.kGreen, ROOT.kMagenta, ROOT.kBlue, ROOT.kOrange-3]
+        colors = [ROOT.kRed, ROOT.kOrange-6, ROOT.kOrange-3, ROOT.kGreen,
+                  ROOT.kAzure+8, ROOT.kBlue, ROOT.kViolet+1, ROOT.kPink+6]
         for i in range(1, numNames):
             histos[i].SetLineWidth(1)
             histos[i].SetMarkerStyle(20)
@@ -270,7 +277,7 @@ for iVar, variable in enumerate(variables):
             # print(str(systErrsUp[1][0])+"\n") #first number is the systematic, second number is the bin
 
             ### Okay now that we've computed all bins' errors for each pair of variations, let's add them in quadrature
-            systErrTotalUp = array('d')
+            systErrTotalUp   = array('d')
             systErrTotalDown = array('d')
             ## Loop over the number of bins
             for iBin in range(0, numBins):
@@ -278,8 +285,17 @@ for iVar, variable in enumerate(variables):
                 sumDown = 0.
                 ## Loop over the number of systematics
                 for j in range(0, int((numNames-1)/2), 1):
-                    sumUp += (systErrsUp[j][iBin])*(systErrsUp[j][iBin])
-                    sumDown += (systErrsDown[j][iBin])*(systErrsDown[j][iBin])
+                    # ---
+                    # do in the general case where both up/down variations from central are non-zero
+                    if ( (systErrsUp[j][iBin] > 0) and (systErrsDown[j][iBin] > 0) ):
+                        sumUp   += (systErrsUp[j][iBin])*(systErrsUp[j][iBin])
+                        sumDown += (systErrsDown[j][iBin])*(systErrsDown[j][iBin])
+                    # but in the case of one of the variations being zero, must take the non-zero variation as a symmetric up/down uncertainty on that bin (e.g. the unfolding systematic)
+                    else:
+                        uncertTemp = max(systErrsUp[j][iBin], systErrsDown[j][iBin])
+                        sumUp   += (uncertTemp * uncertTemp)
+                        sumDown += (uncertTemp * uncertTemp)
+                    # ---
                 systErrTotalUp.append(math.sqrt(sumUp))
                 systErrTotalDown.append(math.sqrt(sumDown))
 
@@ -305,8 +321,8 @@ for iVar, variable in enumerate(variables):
             grCentralSystErrors.SetLineColor(ROOT.kBlack)
             grCentralSystErrors.SetFillColorAlpha(ROOT.kBlack, 0.6)
             grCentralSystErrors.SetMarkerSize(0.)
-            grCentralSystErrors.Draw("E2 same") #draws just the hatched bands
-            hCentral.Draw("PE same") #draws the points with statistical error bars
+            grCentralSystErrors.Draw("E2 same") #draws just the hatched bands that represent only the total systematic uncertainty
+            hCentral.Draw("PE same")            #draws the points with statistical error bars
 
         else:
             for i in range(1, numNames):
@@ -392,7 +408,8 @@ for iVar, variable in enumerate(variables):
     #########################
     c1.Update()
     if (doGenRecoComp):
-        c1.Print(cwd+"/"+outputDir+"systPlot_"+variable+"-wComp.pdf")
+        print("wComp plot turned off for now!")
+#        c1.Print(cwd+"/"+outputDir+"systPlot_"+variable+"-wComp.pdf")
     else:
         c1.Print(cwd+"/"+outputDir+"systPlot_"+variable+"-wSystXSecs.pdf")
     if (c1):
@@ -404,7 +421,7 @@ for iVar, variable in enumerate(variables):
 
 ######################################################################################################################
 
-## Make percent uncertainty systematics plot
+    ## Make percent uncertainty systematics plot
     if (doSystBands):
         c1 = ROOT.TCanvas("c1", "c1", 400, 400)
         c1.cd()
@@ -423,7 +440,7 @@ for iVar, variable in enumerate(variables):
         htemp.SetStats(0)
         htemp.GetXaxis().SetTitle(hCentral.GetXaxis().GetTitle())
         htemp.GetXaxis().SetTitleOffset(1.2)
-        htemp.SetTitle(variable+", Syst. Uncertainties")
+        htemp.SetTitle(variable+", Syst. Uncert. Breakdown")
         htemp.Draw()
 
         for i in range(0, int((numNames-1)/2), 1):
@@ -434,7 +451,16 @@ for iVar, variable in enumerate(variables):
                 # print(hCentral.GetBinContent(jBin+1))
                 # print( (max(systErrsUp[i][jBin], systErrsDown[i][jBin]))*100./hCentral.GetBinContent(jBin+1) )
                 # print("---")
-                percentUncertainty = (max(systErrsUp[i][jBin], systErrsDown[i][jBin]))*100./(hCentral.GetBinContent(jBin+1))
+                # ---
+                # general case where you have one variation above central and one variation below central
+                # in this case, take the average of the up/down variations from central
+                if ( (systErrsUp[i][jBin] > 0) and (systErrsDown[i][jBin] > 0) ):
+                    uncertTemp = 0.5 * (systErrsUp[i][jBin] + systErrsDown[i][jBin])
+                # special case (e.g. the unfolding uncertainty where you only have one variation above or below the central)
+                else:
+                    uncertTemp = max(systErrsUp[i][jBin], systErrsDown[i][jBin])
+                percentUncertainty = (uncertTemp/hCentral.GetBinContent(jBin+1)) * 100.
+                # ---
                 hTemp_PercUncert.SetBinContent(jBin+1, percentUncertainty)
                 hTemp_PercUncert.SetBinError(jBin+1, 0.)
             hTemp_PercUncert.SetLineWidth(2)
@@ -449,7 +475,11 @@ for iVar, variable in enumerate(variables):
         print("\n ----- Total Percent Uncertainty -----")
         for iBin in range(0, numBins):
             percentUncertainty = 0.
-            percentUncertainty = (max(systErrTotalUp[iBin], systErrTotalDown[iBin]))*100./(hCentral.GetBinContent(iBin+1))
+            # --- 
+            # averaging the final up and down uncertainties that are calculated above
+            uncertTemp = 0.5 * (systErrTotalUp[iBin] + systErrTotalDown[iBin])
+            percentUncertainty = (uncertTemp/hCentral.GetBinContent(iBin+1)) * 100.
+            # ---
             hTemp_PercUncert.SetBinContent(iBin+1, percentUncertainty)
             hTemp_PercUncert.SetBinError(iBin+1, 0.)
             print("Bin #"+str(iBin+1)+": "+str(percentUncertainty)+" %")
@@ -461,10 +491,12 @@ for iVar, variable in enumerate(variables):
         histos_PercentUncertainty.append(hTemp_PercUncert)
         histos_PercentUncertainty[int((numNames-1)/2)].Draw("SAME")
 
+        ROOT.gPad.RedrawAxis()
+
 #        leg1 = ROOT.TLegend(0.625,0.1,0.9,0.4) # nominal
-        leg1 = ROOT.TLegend(0.1,0.1,0.425,0.325)
+        leg1 = ROOT.TLegend(0.1,0.1,0.425,0.33)
         if (numNames > 1):
-            leg1.AddEntry(histos_PercentUncertainty[int((numNames-1)/2)], "Total Syst. Uncertainty", "l")
+            leg1.AddEntry(histos_PercentUncertainty[int((numNames-1)/2)], "Total Systematic Uncertainty", "l")
             for i in range(0, int((numNames-1)/2), 1):
                 leg1.AddEntry(histos_PercentUncertainty[i], namesLegend[i], "l")
         leg1.Draw("same")
