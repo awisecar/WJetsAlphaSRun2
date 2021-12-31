@@ -12,25 +12,43 @@ from fastnlo import fastNLOCRunDec
 
 #process = 'W1J'
 #basedir = "/home/awisecar/analysis/openloops/21_04_29/1j_submitted_25april21/"
+#basedir = "/home/awisecar/analysis/openloops/21_07_20/1j_AndrewEdit_results/"
+#basedir = "/home/awisecar/analysis/openloops/21_07_20/1j_JoonBinEdit_results/"
+#basedir = "/home/awisecar/analysis/openloops/21_08_05/1j_5flavorCheck_tables/"
+#basedir = "/home/awisecar/analysis/openloops/21_08_08/1j_5flavorCheck_take2_tables/"
 #tablenames = ['d56-x01-y01.merged']
-process = 'W2J'
-basedir = "/home/awisecar/analysis/openloops/21_04_29/2j_submitted_26april21/"
-tablenames = ['d57-x01-y01.merged']
+#process = 'W2J'
+#basedir = "/home/awisecar/analysis/openloops/21_04_29/2j_submitted_26april21/"
+#basedir = "/home/awisecar/analysis/openloops/21_07_29/2j_JoonBinEdit_results/"
+#tablenames = ['d57-x01-y01.merged', 'd63-x01-y01.merged']
+process = 'W3J'
+#basedir = "/home/awisecar/analysis/openloops/21_07_22/3j_results/"
+basedir = "/home/awisecar/analysis/openloops/21_08_15/3j_JoonBinEdit_tables/"
+tablenames = ['d58-x01-y01.merged', 'd64-x01-y01.merged']
 
 # ---
 
 # 6.11.18 - OpenLoops tables need to be read with variable-flavor scheme in order for proper Rivet-FNLO closure
-doOpenLoops = True
+doOpenLoops = True   
 
-#use PDFs determined with certain alpha-s values
-#order of PDFs: CT14nlo, NNPDF30_nlo, NNPDF31_nlo, HERAPDF20_NLO
-pdfsets = ['CT14nlo', 'NNPDF30_nlo', 'NNPDF31_nlo', 'HERAPDF20_N']
-alphasstrlist = [ 
-                  ["111","112","113","114","115","116","117","118","119","120","121","122","123"],
-                  ["115", "117", "118", "119", "121"],
-                  ["116","118", "120"],
-                  ["110","111","112","113","114","115","116","117","118","119","120","121","122","123","124","125","126","127","128","129","130"]
-                ]
+
+#use PDFs determined with certain alpha-s values --
+
+#CT18NLO only  
+pdfsets = ['CT18NLO_as_']
+alphasstrlist = [ ["110", "111", "112", "113", "114", "115", "116", "117", "118", "119", "120", "121", "122", "123", "124"] ]
+
+# #order of PDFs: CT14nlo, NNPDF30_nlo, NNPDF31_nlo, HERAPDF20_NLO, CT18NLO, ABMP16_5_nlo, MSHT20nlo
+# pdfsets = ['CT14nlo', 'NNPDF30_nlo', 'NNPDF31_nlo', 'HERAPDF20_N', 'CT18NLO_as_', 'ABMP16als11', 'MSHT20nlo_a']
+# alphasstrlist = [ 
+#                   ["111","112","113","114","115","116","117","118","119","120","121","122","123"],
+#                   ["115", "117", "118", "119", "121"],
+#                   ["116","118", "120"],
+#                   ["110","111","112","113","114","115","116","117","118","119","120","121","122","123","124","125","126","127","128","129","130"],
+#                   ["110", "111", "112", "113", "114", "115", "116", "117", "118", "119", "120", "121", "122", "123", "124"],
+#                   ["114", "115", "116", "117", "118", "119", "120", "121", "122", "123"],
+#                   ["108", "109", "110", "111", "112", "113", "114", "115", "116", "117", "118", "119", "120", "121", "122", "123", "124", "125", "126", "127", "128", "129", "130"]
+#                 ]
 
 ############################################
 nowtime = datetime.datetime.now()
@@ -84,6 +102,8 @@ for tablename in tablenames:
             outfile.write(","+str(alphas))
         outfile.write("\n")
         
+        # ---------------------------------------------------------------------------------
+
         ## Do alpha-s calculations
         alphaslist = []
         
@@ -93,19 +113,46 @@ for tablename in tablenames:
         
         for i, alphas in enumerate(alphasvals):
 
-            if (pdfset == 'HERAPDF20_N'):
-                fnlo.SetLHAPDFFilename(pdfset+"LO_ALPHAS_"+alphasstrlist[idx][i])
-            else:
-                fnlo.SetLHAPDFFilename(pdfset+"_as_0"+alphasstrlist[idx][i])
+            if (pdfset != 'MSHT20nlo_a'):
+                if (pdfset == 'HERAPDF20_N'):
+                    fnlo.SetLHAPDFFilename(pdfset+"LO_ALPHAS_"+alphasstrlist[idx][i])
+                elif (pdfset == 'ABMP16als11'):
+                    fnlo.SetLHAPDFFilename("ABMP16als"+alphasstrlist[idx][i]+"_5_nlo")
+                elif (pdfset == 'CT18NLO_as_'):
+                    fnlo.SetLHAPDFFilename("CT18NLO_as_0"+alphasstrlist[idx][i])
+                else:
+                    fnlo.SetLHAPDFFilename(pdfset+"_as_0"+alphasstrlist[idx][i])
+                fnlo.SetLHAPDFMember(0)
+                fnlo.SetAlphasMz(alphas, False)
+                print '\nDoing alpha-s = ' + str(fnlo.GetAlphasMz()) #Double checking here that the aS and PDF have been properly set
+                print 'Using PDF set: ' + str(fnlo.GetLHAPDFFilename())
+                print 'Using PDF member: ' + str(fnlo.GetIPDFMember())
+                fnlo.CalcCrossSection()
+                fnlo.PrintCrossSections()
+                xsecvals = fnlo.GetCrossSection()
+                alphaslist.append(xsecvals)
 
-            fnlo.SetLHAPDFMember(0)
-            fnlo.SetAlphasMz(alphas, False)
-            print '\nDoing alpha-s = ' + str(fnlo.GetAlphasMz()) #Double checking here that the aS and PDF have been properly set
-            print 'Using PDF set: ' + str(fnlo.GetLHAPDFFilename())
-            fnlo.CalcCrossSection()
-            fnlo.PrintCrossSections()
-            xsecvals = fnlo.GetCrossSection()
-            alphaslist.append(xsecvals)
+            else:
+                fnlo.SetLHAPDFFilename("MSHT20nlo_as_largerange")
+                # mem=1-12 => alpha_S(M_Z) = 0.108, 0.109, 0.110, 0.111, 0.112, 0.113, 0.114, 0.115, 0.116, 0.117, 0.118, 0.119 
+                if (i < 12):
+                    fnlo.SetLHAPDFMember(i+1) 
+                # mem=0 => best fit alpha_S(M_Z) = 0.120
+                elif (i == 12):
+                    fnlo.SetLHAPDFMember(0)   
+                # mem=13-22 => alpha_S(M_Z) = 0.121, 0.122, 0.123, 0.124, 0.125, 0.126, 0.127, 0.128, 0.129, 0.130
+                elif (i > 12):
+                    fnlo.SetLHAPDFMember(i) 
+                fnlo.SetAlphasMz(alphas, False)
+                print '\nDoing alpha-s = ' + str(fnlo.GetAlphasMz()) #Double checking here that the aS and PDF have been properly set
+                print 'Using PDF set: ' + str(fnlo.GetLHAPDFFilename())
+                print 'Using PDF member: ' + str(fnlo.GetIPDFMember())
+                fnlo.CalcCrossSection()
+                fnlo.PrintCrossSections()
+                xsecvals = fnlo.GetCrossSection()
+                alphaslist.append(xsecvals)
+
+        # ---------------------------------------------------------------------------------
         
         ## Write out data
         for i in range(0,numObsBin):

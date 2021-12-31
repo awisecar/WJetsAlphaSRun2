@@ -419,7 +419,7 @@ for iVar, variable in enumerate(variables):
     ## Delete TCanvas and such
     del c1, htemp, htemp1, leg1
 
-######################################################################################################################
+    ######################################################################################################################
 
     ## Make percent uncertainty systematics plot
     if (doSystBands):
@@ -440,7 +440,8 @@ for iVar, variable in enumerate(variables):
         htemp.SetStats(0)
         htemp.GetXaxis().SetTitle(hCentral.GetXaxis().GetTitle())
         htemp.GetXaxis().SetTitleOffset(1.2)
-        htemp.SetTitle(variable+", Syst. Uncert. Breakdown")
+#        htemp.SetTitle(variable+", Syst. Uncert. Breakdown")
+        htemp.SetTitle("")
         htemp.Draw()
 
         for i in range(0, int((numNames-1)/2), 1):

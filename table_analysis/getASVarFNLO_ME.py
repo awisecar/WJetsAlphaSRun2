@@ -11,21 +11,45 @@ from fastnlo import fastNLOCRunDec
 ############################################
 
 process = 'W1J' 
-basedir = "/home/awisecar/analysis/openloops/21_04_29/1j_submitted_25april21/"
+#basedir = "/home/awisecar/analysis/openloops/21_04_29/1j_submitted_25april21/"
+#basedir = "/home/awisecar/analysis/openloops/21_07_20/1j_AndrewEdit_results/"
+basedir = "/home/awisecar/analysis/openloops/21_07_20/1j_JoonBinEdit_results/"
+#basedir = "/home/awisecar/analysis/openloops/21_08_05/1j_5flavorCheck_tables/"
+#basedir = "/home/awisecar/analysis/openloops/21_08_08/1j_5flavorCheck_take2_tables/"
 tablenames = ['d56-x01-y01.merged']
 #process = 'W2J' 
 #basedir = "/home/awisecar/analysis/openloops/21_04_29/2j_submitted_26april21/"
-#tablenames = ['d57-x01-y01.merged']
+#basedir = "/home/awisecar/analysis/openloops/21_07_29/2j_JoonBinEdit_results/"
+#tablenames = ['d57-x01-y01.merged', 'd63-x01-y01.merged']
+# process = 'W3J'
+# #basedir = "/home/awisecar/analysis/openloops/21_07_22/3j_results/"
+# basedir = "/home/awisecar/analysis/openloops/21_08_15/3j_JoonBinEdit_tables/"
+# tablenames = ['d58-x01-y01.merged', 'd64-x01-y01.merged']
 
 # ---
 
 # 6.11.18: OpenLoops tables need to be read with flexible flavor scheme in order for proper Rivet-FNLO closure
-doOpenLoops = True
+doOpenLoops = True  
 
-#order of PDFs: CT14nlo, NNPDF30_nlo, NNPDF31_nlo, HERAPDF20_NLO
-pdfsets = ['CT14nlo', 'NNPDF30_nlo', 'NNPDF31_nlo', 'HERAPDF20_N']
-pdfevals = ['CT14nlo_as_0118', 'NNPDF30_nlo_as_0118', 'NNPDF31_nlo_as_0118', 'HERAPDF20_NLO_ALPHAS_118']
-alphasvalslist = [ np.arange(0.111, 0.124, 0.001), [0.115, 0.117, 0.118, 0.119, 0.121], [0.116, 0.118, 0.120], np.arange(0.110, 0.131, 0.001) ]
+#CT14nlo only
+pdfsets = [ 'CT14nlo' ]
+pdfevals = [ 'CT14nlo_as_0118' ]
+alphasvalslist = [ np.arange(0.111, 0.124, 0.001) ]
+
+
+# #CT18NLO only
+# pdfsets = [ 'CT18NLO_as_' ]
+# pdfevals = [ 'CT18NLO_as_0118' ]
+# alphasvalslist = [ np.arange(0.110, 0.125, 0.001) ]
+
+
+# #order of PDFs: CT14nlo, NNPDF30_nlo, NNPDF31_nlo, HERAPDF20_NLO, CT18NLO, ABMP16_5_nlo, MSHT20nlo
+# pdfsets = ['CT14nlo', 'NNPDF30_nlo', 'NNPDF31_nlo', 'HERAPDF20_N', 
+#            'CT18NLO_as_', 'ABMP16als11', 'MSHT20nlo_a']
+# pdfevals = ['CT14nlo_as_0118', 'NNPDF30_nlo_as_0118', 'NNPDF31_nlo_as_0118', 'HERAPDF20_NLO_ALPHAS_118', 
+#             'CT18NLO_as_0118', 'ABMP16als118_5_nlo', 'MSHT20nlo_as118']
+# alphasvalslist = [ np.arange(0.111, 0.124, 0.001), [0.115, 0.117, 0.118, 0.119, 0.121], [0.116, 0.118, 0.120], np.arange(0.110, 0.131, 0.001), 
+#                    np.arange(0.110, 0.125, 0.001), np.arange(0.114, 0.124, 0.001), np.arange(0.108, 0.130, 0.001) ]
 
 ############################################
 nowtime = datetime.datetime.now()

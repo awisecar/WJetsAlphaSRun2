@@ -17,18 +17,29 @@ unfolded data and other theory predictions
 > doData gets the unfolded data and other theory predictions from unfolding code
 '''
 ##################################################
-### R21 (list num first, then denom)
-numerator = 'W2J'
+### -- R21 (list num first, then denom)
+numerator   = 'W2J'
 denominator = 'W1J'
-tablenames = [ ['d57-x01-y01.merged','d56-x01-y01.merged'] ]
-## --
-pdfnames = ['CT14nlo', 'NNPDF30_nlo', 'NNPDF31_nlo', 'HERAPDF20_N']
+tablenames  = [ ['d57-x01-y01.merged', 'd56-x01-y01.merged'] ]
+### -- R32 (list num first, then denom)
+#numerator   = 'W3J'
+#denominator = 'W2J'
+#tablenames  = [ ['d58-x01-y01.merged', 'd57-x01-y01.merged'],
+#                ['d64-x01-y01.merged', 'd63-x01-y01.merged'] ]
+### -- R31 (list num first, then denom)
+#numerator   = 'W3J'
+#denominator = 'W1J'
+#tablenames  = [ ['d58-x01-y01.merged', 'd56-x01-y01.merged'] ]
+## -----------------------------------------------
+pdfnames = ['CT18NLO_as_']
+#pdfnames = ['CT14nlo', 'CT18NLO_as_', 'NNPDF30_nlo', 'NNPDF31_nlo',
+#            'HERAPDF20_N', 'ABMP16als11', 'MSHT20nlo_a']
 ## --
 doErrors = True
 #doErrors = False
 ## --
-# doNP = True
-doNP = False
+doNP = True
+#doNP = False
 ## --
 doData = True
 #doData = False
@@ -81,13 +92,7 @@ for tablename in tablenames:
         variableNum = ""
         variableDenom = ""
         if ((numerator == 'W2J') and (denominator == 'W1J')):
-            if (tablename[0] == 'd07-x01-y01.merged' and tablename[1] == 'd06-x01-y01.merged'):
-                variableNum = "LepPtPlusLeadingJetPt_Zinc2jet_TUnfold"
-                variableDenom = "LepPtPlusLeadingJetPt_Zinc1jet_TUnfold"
-            elif (tablename[0] == 'd07-x01-y01.merged' and tablename[1] == 'd31-x01-y01.merged'):
-                variableNum = "LepPtPlusLeadingJetPt_Zinc2jet_TUnfold"
-                variableDenom = "LepPtPlusLeadingJetPt_Zexc1jet_TUnfold"
-            elif (tablename[0] == 'd57-x01-y01.merged' and tablename[1] == 'd56-x01-y01.merged'):
+            if (tablename[0] == 'd57-x01-y01.merged' and tablename[1] == 'd56-x01-y01.merged'):
                 variableNum = "LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold"
                 variableDenom = "LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold"
             elif (tablename[0] == 'd57-x01-y01.merged' and tablename[1] == 'd81-x01-y01.merged'):
@@ -229,6 +234,11 @@ for tablename in tablenames:
             hUnfRatio.SetLineColor(ROOT.kBlack)
             hUnfRatio.SetLineWidth(2)
             hUnfRatio.SetMarkerColor(ROOT.kBlack)
+            # check if the unfolded data distribution has NaN values
+            for i in range(1, hUnfRatio.GetNbinsX()+1):
+                if ( math.isnan( hUnfRatio.GetBinContent(i) ) ):
+                    hUnfRatio.SetBinContent(i, 0.0)
+                    hUnfRatio.SetBinError(i, 0.0)
             hSignalMCRatio = fRatio.Get("GenSignalXSecRatio_NLOFxFx")
             hSignalMCRatio.SetLineColor(ROOT.kOrange)
             hSignalMCRatio.SetLineWidth(2)
@@ -241,8 +251,12 @@ for tablename in tablenames:
         # xmin = binCenMEnum[0]-(binCenMEnum[1]-binCenMEnum[0])/2.
         # xmax = binCenMEnum[numBins-1]+(binCenMEnum[numBins-1]-binCenMEnum[numBins-2])/2.
         # hard-coded:
-        xmin = 200.
-        xmax = 1400.
+        if (tablename[0] == 'd64-x01-y01.merged' and tablename[1] == 'd63-x01-y01.merged'):
+            xmin = 200.
+            xmax = 1050.
+        else:
+            xmin = 200.
+            xmax = 1400.
 
         ## Get y-bounds and titles depending on distribution
         ## Using linear y-axis for ratios
@@ -252,16 +266,6 @@ for tablename in tablenames:
         binDataOffset = 1
         if ((numerator == 'W2J') and (denominator == 'W1J')):
             title = 'Ratio of W+2j+X/W+1j+X'
-            if (tablename[0] == 'd07-x01-y01.merged' and tablename[1] == 'd06-x01-y01.merged'):
-                ymax = 1.4
-                xtitle = 'Muon pT + Leading Jet pT [GeV]'
-                title += ', Muon pT + Leading Jet pT'
-                binDataOffset = 1
-            if (tablename[0] == 'd07-x01-y01.merged' and tablename[1] == 'd31-x01-y01.merged'):
-                ymax = 7.
-                xtitle = 'Muon pT + Leading Jet pT [GeV]'
-                title += ', Muon pT + Leading Jet pT'
-                binDataOffset = 1
             if (tablename[0] == 'd57-x01-y01.merged' and tablename[1] == 'd56-x01-y01.merged'):
                 ymax = 1.1
                 xtitle = 'Muon p_{T} + Leading Jet p_{T} [GeV]'
@@ -271,26 +275,26 @@ for tablename in tablenames:
                 ymax = 0.8
                 xtitle = 'Muon pT + Leading Jet pT [GeV]'
                 title += ', Muon pT + Leading Jet pT'
-                binDataOffset = 1
+                binDataOffset = 3
         elif ((numerator == 'W3J') and (denominator == 'W2J')):
             title = 'Ratio of W+3j+X/W+2j+X'
             if (tablename[0] == 'd58-x01-y01.merged' and tablename[1] == 'd57-x01-y01.merged'):
-                ymax = 0.3
-                xtitle = 'Muon pT + Leading AK8 Jet pT [GeV]'
+                ymax = 0.55
+                xtitle = 'Muon p_{T} + Leading Jet p_{T} [GeV]'
                 title += ', Muon pT + Leading Jet pT'
-                binDataOffset = 1
+                binDataOffset = 3
             if (tablename[0] == 'd64-x01-y01.merged' and tablename[1] == 'd63-x01-y01.merged'):
-                ymax = 0.3
+                ymax = 0.67
                 xtitle = 'Muon pT + H_{T,2}/2 [GeV]'
                 title += ', Muon pT + HT,2/2'
-                binDataOffset = 1
+                binDataOffset = 2
         elif ((numerator == 'W3J') and (denominator == 'W1J')):
             title = 'Ratio of W+3j+X/W+1j+X'
             if (tablename[0] == 'd58-x01-y01.merged' and tablename[1] == 'd56-x01-y01.merged'):
-                ymax = 0.1
-                xtitle = 'Muon pT + Leading AK8 Jet pT [GeV]'
+                ymax = 0.4
+                xtitle = 'Muon p_{T} + Leading Jet p_{T} [GeV]'
                 title += ', Muon pT + Leading Jet pT'
-                binDataOffset = 1
+                binDataOffset = 3
                 
         ## Easier to change axis ranges if you draw a TH1 with those ranges first
         htemp = ROOT.TH1D("aSRatio_"+tablename[0]+"_TO_"+tablename[1], title, 100, xmin, xmax)
@@ -314,8 +318,8 @@ for tablename in tablenames:
         leg1 = ROOT.TLegend(0.24,0.75,0.935,0.975)
         leg1.SetTextSize(0.027)
         if (doData):
-            leg1.AddEntry(hUnfRatio, "Unfolded Data", "lp")
-            leg1.AddEntry(hSignalMCRatio, "MG5_aMC FxFx + PY8 (#leq 2j NLO + PS)", "lp")
+            leg1.AddEntry(hUnfRatio, "Unfolded Data", "lpe")
+            leg1.AddEntry(hSignalMCRatio, "MG5_aMC FxFx + PY8 (#leq 2j NLO + PS)", "lpe")
 
         #Keeping the graphs in a list allows us to draw multiple on canvas
         grMElist = []
@@ -384,12 +388,21 @@ for tablename in tablenames:
             ## -- Legend --
             if (pdfname == 'HERAPDF20_N'):
                 pdfname = 'HERAPDF20_NLO'
+            if (pdfname == 'CT18NLO_as_'):
+                pdfname = 'CT18nlo'
+            if (pdfname == 'ABMP16als11'):
+                pdfname = 'ABMP16_5_nlo'
+            if (pdfname == 'MSHT20nlo_a'):
+                pdfname = 'MSHT20nlo'
+            timesNPcorr = ""
+            if (doNP):
+                timesNPcorr = " #otimes NP"
             if (i == 0):
-                leg1.AddEntry(gr, "NLO QCD: ME+PDF("+pdfname+"), #alpha_{s }= "+str(round(alphas,3)), "lp")
+                leg1.AddEntry(gr, "NLO QCD"+timesNPcorr+": ME+PDF("+pdfname+"), #alpha_{s }= "+str(round(alphas,3)), "lpe")
             if ((round(alphas,3)) == 0.118):
-                leg1.AddEntry(gr, "NLO QCD: ME+PDF("+pdfname+"), #alpha_{s }= "+str(round(alphas,3)), "lp")
+                leg1.AddEntry(gr, "NLO QCD"+timesNPcorr+": ME+PDF("+pdfname+"), #alpha_{s }= "+str(round(alphas,3)), "lpe")
             if (i == numVarMEPDF-1):
-                leg1.AddEntry(gr, "NLO QCD: ME+PDF("+pdfname+"), #alpha_{s }= "+str(round(alphas,3)), "lp")
+                leg1.AddEntry(gr, "NLO QCD"+timesNPcorr+": ME+PDF("+pdfname+"), #alpha_{s }= "+str(round(alphas,3)), "lpe")
             grMEPDFlist.append(gr)
 
         ## Now plot --------------------------------------------
@@ -413,7 +426,7 @@ for tablename in tablenames:
         cmsLogo.SetTextColor(ROOT.kBlack)
         cmsLogo.SetTextAlign(11)
         cmsLogo.SetName("cmsLogo")
-        cmsLogo.DrawLatex(0.540,0.18,"CMS")
+        cmsLogo.DrawLatex(0.57,0.18,"CMS")
         del cmsLogo
         cmsPrelim = ROOT.TLatex()
         cmsPrelim.SetNDC()
@@ -423,7 +436,7 @@ for tablename in tablenames:
         cmsPrelim.SetTextColor(ROOT.kBlack)
         cmsPrelim.SetTextAlign(11)
         cmsPrelim.SetName("cmsPrelim")
-        cmsPrelim.DrawLatex(0.645,0.18,"Work in Progress")
+        cmsPrelim.DrawLatex(0.68,0.18,"Preliminary")
         del cmsPrelim
         latexWJet = ROOT.TLatex()
         latexWJet.SetNDC()
@@ -449,11 +462,11 @@ for tablename in tablenames:
             latexWJet.DrawLatex(0.526,0.08, wtitle)
         else:
             latexWJet.DrawLatex(0.56,0.08, wtitle)
-        if (doNP):
-            MEgentitle = "NP Corr. Applied"
-            latexWJet.SetTextFont(52)
-            latexWJet.SetTextSize(0.025)
-            latexWJet.DrawLatex(0.545, 0.695, MEgentitle)
+#        if (doNP):
+#            MEgentitle = "NP Corr. Applied"
+#            latexWJet.SetTextFont(52)
+#            latexWJet.SetTextSize(0.025)
+#            latexWJet.DrawLatex(0.545, 0.695, MEgentitle)
         del latexWJet
 
         ## ---------------------------------------------------
@@ -474,7 +487,8 @@ for tablename in tablenames:
         # htemp1.GetYaxis().SetRangeUser(0.01, 2.15)
         # htemp1.GetYaxis().SetRangeUser(0.51, 1.49)
         # htemp1.GetYaxis().SetRangeUser(0.701, 1.299)
-        htemp1.GetYaxis().SetRangeUser(0.851, 1.149)
+        htemp1.GetYaxis().SetRangeUser(0.851, 1.149) # nominal
+#        htemp1.GetYaxis().SetRangeUser(0.01, 4.45) # zoom out
         htemp1.SetTitle("")
         htemp1.Draw()
 

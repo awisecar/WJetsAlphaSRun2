@@ -16,15 +16,30 @@ from array import array
 #########################################
 numTables = 200  
 # --
-pdfsets = ['CT14nlo','NNPDF30_nlo_as_0118','NNPDF31_nlo_as_0118', 'HERAPDF20_NLO_ALPHAS_118'] #names of PDFs in LHAPDF6 library
-pdfnames2 = ['CT14nlo','NNPDF30_nlo','NNPDF31_nlo','HERAPDF20_N'] #names of PDFs in output YODA file
+#names of PDFs in LHAPDF6 library
+pdfsets = ['CT18NLO_as_0118']
+#pdfsets = ['CT14nlo','NNPDF30_nlo_as_0118','NNPDF31_nlo_as_0118', 'HERAPDF20_NLO_ALPHAS_118', 'CT18NLO_as_0118', 'ABMP16als118_5_nlo', 'MSHT20nlo_as118'] 
+#names of PDFs in output YODA file
+pdfnames2 = ['CT18NLO_as_']
+#pdfnames2 = ['CT14nlo','NNPDF30_nlo','NNPDF31_nlo','HERAPDF20_N', 'CT18NLO_as_', 'ABMP16als11', 'MSHT20nlo_a'] 
 # --
 #process = 'W1J'
 #basedir = "/home/awisecar/analysis/openloops/21_04_29/1j_submitted_25april21/"
-#tablenames = ["d56"]
-process = 'W2J'  
-basedir = "/home/awisecar/analysis/openloops/21_04_29/2j_submitted_26april21/"
-tablenames = ["d57"] 
+#basedir = "/home/awisecar/analysis/openloops/21_07_20/1j_AndrewEdit_results/"
+#basedir = "/home/awisecar/analysis/openloops/21_07_20/1j_JoonBinEdit_results/"
+#basedir = "/home/awisecar/analysis/openloops/21_08_05/1j_5flavorCheck_tables/"
+#basedir = "/home/awisecar/analysis/openloops/21_08_08/1j_5flavorCheck_take2_tables/"
+#tablenames = ["d56"] 
+# --
+#process = 'W2J'  
+##basedir = "/home/awisecar/analysis/openloops/21_04_29/2j_submitted_26april21/"
+#basedir = "/home/awisecar/analysis/openloops/21_07_29/2j_JoonBinEdit_results/"
+#tablenames = ["d57", "d63"] 
+# --
+process = 'W3J'  
+#basedir = "/home/awisecar/analysis/openloops/21_07_22/3j_results/"
+basedir = "/home/awisecar/analysis/openloops/21_08_15/3j_JoonBinEdit_tables/"
+tablenames = ["d58", "d64"]   
 #########################################
 
 print ('Remember to rename the zeroth table!')

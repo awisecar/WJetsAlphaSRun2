@@ -19,10 +19,14 @@ and other theory predictions
 ##################################################
 processes = ['W1J']
 tablenames = ['d56-x01-y01.merged']
-# processes = ['W2J']
-# tablenames = ['d57-x01-y01.merged']
+#processes = ['W2J']
+#tablenames = ['d57-x01-y01.merged', 'd63-x01-y01.merged']
+#processes = ['W3J']
+#tablenames = ['d58-x01-y01.merged', 'd64-x01-y01.merged']
 ## --
-pdfnames = ['CT14nlo', 'NNPDF30_nlo', 'NNPDF31_nlo', 'HERAPDF20_N']
+pdfnames = ['CT18NLO_as_']
+#pdfnames = ['CT14nlo', 'CT18NLO_as_', 'NNPDF30_nlo', 'NNPDF31_nlo',
+#            'HERAPDF20_N', 'ABMP16als11', 'MSHT20nlo_a']
 ## --
 doErrors = True
 #doErrors = False
@@ -72,17 +76,11 @@ for process in processes:
             
             ## Grab unfolded data and signal W+jets MC
             if (process == 'W1J'):
-                if (tablename == 'd06-x01-y01.merged'):
-                    variable = "LepPtPlusLeadingJetPt_Zinc1jet_TUnfold"
-                if (tablename == 'd31-x01-y01.merged'):
-                    variable = "LepPtPlusLeadingJetPt_Zexc1jet_TUnfold"
                 if (tablename == 'd56-x01-y01.merged'):
                     variable = "LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold"
                 if (tablename == 'd81-x01-y01.merged'):
                     variable = "LepPtPlusLeadingJetAK8Pt_Zexc1jet_TUnfold"
             if (process == 'W2J'):
-                if (tablename == 'd07-x01-y01.merged'):
-                    variable = "LepPtPlusLeadingJetPt_Zinc2jet_TUnfold"
                 if (tablename == 'd57-x01-y01.merged'):
                     variable = "LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold"
                 if (tablename == 'd63-x01-y01.merged'):
@@ -201,10 +199,17 @@ for process in processes:
                 hUnf.SetLineColor(ROOT.kBlack)
                 hUnf.SetLineWidth(2)
                 hUnf.SetMarkerColor(ROOT.kBlack)
+                # check if the unfolded data distribution has NaN values
+                for i in range(1, hUnf.GetNbinsX()+1):
+                    if ( math.isnan( hUnf.GetBinContent(i) ) ):
+                        hUnf.SetBinContent(i, 0.0)
+                        hUnf.SetBinError(i, 0.0)
+                # --
                 hWJetsNLOFxFx = fUnf.Get("hMadGenCrossSection")
                 hWJetsNLOFxFx.SetLineColor(ROOT.kOrange)
                 hWJetsNLOFxFx.SetLineWidth(2)
                 hWJetsNLOFxFx.SetMarkerColor(ROOT.kOrange)
+                # --
                 hWJetsLOMLM = fUnf.Get("hGen1CrossSection")
                 hWJetsLOMLM.SetLineColor(ROOT.kOrange+3)
                 hWJetsLOMLM.SetLineWidth(2)
@@ -217,8 +222,12 @@ for process in processes:
             # xmin = binCenME[0]-(binCenME[1]-binCenME[0])/2.
             # xmax = binCenME[numBins-1]+(binCenME[numBins-1]-binCenME[numBins-2])/2.
             # hard-coded:
-            xmin = 200.
-            xmax = 1400.
+            if (tablename == 'd56-x01-y01.merged' or tablename == 'd57-x01-y01.merged' or tablename == 'd58-x01-y01.merged'):
+                xmin = 200.
+                xmax = 1400.
+            elif (tablename == 'd63-x01-y01.merged' or tablename == 'd64-x01-y01.merged'):
+                xmin = 200.
+                xmax = 1050.
 
             ## Get y-bounds and titles depending on distribution
             ## Note: binDataOffset only applies to the histograms from the WJets analysis code,
@@ -226,19 +235,7 @@ for process in processes:
             ## Distributions from FastNLO tables are not allowed to have any bins with zero entries
             ROOT.gPad.SetLogy() #set y-axis as logarithmic
             if (process == 'W1J'):
-                if   (tablename == 'd06-x01-y01.merged'):
-                    ymin = 0.0015
-                    ymax = 100
-                    xtitle = 'Muon p_{T} + Leading Jet p_{T} [GeV]'
-                    ytitle = 'd#sigma/dp_{T} [pb/GeV]'
-                    binDataOffset = 1
-                elif (tablename == 'd31-x01-y01.merged'):
-                    ymin = 0.0004
-                    ymax = 100
-                    xtitle = 'Muon p_{T} + Leading Jet p_{T} [GeV]'
-                    ytitle = 'd#sigma/dp_{T} [pb/GeV]'
-                    binDataOffset = 1
-                elif (tablename == 'd56-x01-y01.merged'):
+                if (tablename == 'd56-x01-y01.merged'):
                     ymin = 0.00003
                     ymax = 6.0
                     xtitle = 'Muon p_{T} + Leading Jet p_{T} [GeV]'
@@ -249,39 +246,33 @@ for process in processes:
                     ymax = 0.45
                     xtitle = 'Muon p_{T} + Leading Jet p_{T} [GeV]'
                     ytitle = 'd#sigma/dp_{T} [pb/GeV]'
-                    binDataOffset = 1
+                    binDataOffset = 3
             if (process == 'W2J'):
-                if   (tablename == 'd07-x01-y01.merged'):
-                    ymin = 0.0015
-                    ymax = 20.
-                    xtitle = 'Muon p_{T} + Leading Jet p_{T} [GeV]'
-                    ytitle = 'd#sigma/dp_{T} [pb/GeV]'
-                    binDataOffset = 1
-                elif (tablename == 'd57-x01-y01.merged'):
+                if (tablename == 'd57-x01-y01.merged'):
                     ymin = 0.00002
                     ymax = 1.7
                     xtitle = 'Muon p_{T} + Leading Jet p_{T} [GeV]'
                     ytitle = 'd#sigma/dp_{T} [pb/GeV]'
                     binDataOffset = 3
                 elif (tablename == 'd63-x01-y01.merged'):
-                    ymin = 0.00001
-                    ymax = 0.08
+                    ymin = 0.00012
+                    ymax = 0.8
                     xtitle = 'Muon p_{T} + H_{T,2}/2 [GeV]'
                     ytitle = 'd#sigma/dp_{T} [pb/GeV]'
-                    binDataOffset = 1
+                    binDataOffset = 2
             if (process == 'W3J'):
-                if   (tablename == 'd58-x01-y01.merged'):
-                    ymin = 0.000003
-                    ymax = 0.004
-                    xtitle = 'Muon p_{T} + Leading AK8 Jet p_{T} [GeV]'
+                if (tablename == 'd58-x01-y01.merged'):
+                    ymin = 0.000012
+                    ymax = 0.2
+                    xtitle = 'Muon p_{T} + Leading Jet p_{T} [GeV]'
                     ytitle = 'd#sigma/dp_{T} [pb/GeV]'
-                    binDataOffset = 1
+                    binDataOffset = 3
                 elif (tablename == 'd64-x01-y01.merged'):
-                    ymin = 0.000001
-                    ymax = 0.004
+                    ymin = 0.00004
+                    ymax = 0.15
                     xtitle = 'Muon p_{T} + H_{T,2}/2 [GeV]'
                     ytitle = 'd#sigma/dp_{T} [pb/GeV]'
-                    binDataOffset = 1
+                    binDataOffset = 2
 
             ## Easier to change axis ranges if you draw a TH1 with those ranges first
             htemp = ROOT.TH1D("aSXSec_"+tablename, process+" "+order+", "+tablename, 100, xmin, xmax)
@@ -298,15 +289,31 @@ for process in processes:
             if (doData):
                 hUnf.Draw("E same")
                 hWJetsNLOFxFx.Draw("E same")
-                # hWJetsLOMLM.Draw("E same")
+#                hWJetsLOMLM.Draw("E same")
 
             # Make legend
             leg1 = ROOT.TLegend(0.24,0.75,0.935,0.975)
             leg1.SetTextSize(0.027)
             if (doData):
-                leg1.AddEntry(hUnf, "Unfolded Data", "lp")
-                leg1.AddEntry(hWJetsNLOFxFx, "MG5_aMC FxFx + PY8 (#leq 2j NLO + PS)", "lp")
+                leg1.AddEntry(hUnf, "Unfolded Data", "lpe")
+                leg1.AddEntry(hWJetsNLOFxFx, "MG5_aMC FxFx + PY8 (#leq 2j NLO + PS)", "lpe")
                 # leg1.AddEntry(hWJetsLOMLM, "MG5_aMC MLM + PY8 (#leq 4j LO + PS)", "lp")
+
+            # print out bin contents for the unfolded data
+            print ("\nUnfolded data, bin contents:")
+            for i in range(numBins):
+                binEdgeLowTemp = hUnf.GetBinLowEdge(i+binDataOffset+1)
+                binEdgeUpTemp = hUnf.GetXaxis().GetBinUpEdge(i+binDataOffset+1)
+                contentTemp = hUnf.GetBinContent(i+binDataOffset+1)
+                print ("bin #"+str(i+1)+" - ("+str(binEdgeLowTemp)+","+str(binEdgeUpTemp)+"): "+str(contentTemp))
+
+            # print out bin contents for the NLO FxFx prediction
+            print ("\nNLO FxFx prediction, bin contents:")
+            for i in range(numBins):
+                binEdgeLowTemp = hWJetsNLOFxFx.GetBinLowEdge(i+binDataOffset+1)
+                binEdgeUpTemp = hWJetsNLOFxFx.GetXaxis().GetBinUpEdge(i+binDataOffset+1)
+                contentTemp = hWJetsNLOFxFx.GetBinContent(i+binDataOffset+1)
+                print ("bin #"+str(i+1)+" - ("+str(binEdgeLowTemp)+","+str(binEdgeUpTemp)+"): "+str(contentTemp))
 
             #Keeping the graphs in a list allows us to draw multiple on canvas
             grMElist = []
@@ -374,12 +381,18 @@ for process in processes:
                 ## -- Legend --
                 if (pdfname == 'HERAPDF20_N'):
                     pdfname = 'HERAPDF20_NLO'
+                if (pdfname == 'CT18NLO_as_'):
+                    pdfname = 'CT18nlo'
+                if (pdfname == 'ABMP16als11'):
+                    pdfname = 'ABMP16_5_nlo'
+                if (pdfname == 'MSHT20nlo_a'):
+                    pdfname = 'MSHT20nlo'
                 if (i == 0):
-                    leg1.AddEntry(gr, "NLO QCD: ME+PDF("+pdfname+"), #alpha_{s }= "+str(round(alphas,3)), "lp")
+                    leg1.AddEntry(gr, "NLO QCD: ME+PDF("+pdfname+"), #alpha_{s }= "+str(round(alphas,3)), "lpe")
                 if ((round(alphas,3)) == 0.118):
-                    leg1.AddEntry(gr, "NLO QCD: ME+PDF("+pdfname+"), #alpha_{s }= "+str(round(alphas,3)), "lp")
+                    leg1.AddEntry(gr, "NLO QCD: ME+PDF("+pdfname+"), #alpha_{s }= "+str(round(alphas,3)), "lpe")
                 if (i == numVarMEPDF-1):
-                    leg1.AddEntry(gr, "NLO QCD: ME+PDF("+pdfname+"), #alpha_{s }= "+str(round(alphas,3)), "lp")
+                    leg1.AddEntry(gr, "NLO QCD: ME+PDF("+pdfname+"), #alpha_{s }= "+str(round(alphas,3)), "lpe")
                 grMEPDFlist.append(gr)
             
             ## Now plot --------------------------------------
@@ -391,6 +404,7 @@ for process in processes:
                     grMEPDFlist[i].Draw('PEZ same')
                 if (i == numVarMEPDF-1):
                     grMEPDFlist[i].Draw('PEZ same')
+
             ## And draw legend
             leg1.Draw("same")
 
@@ -403,7 +417,8 @@ for process in processes:
             cmsLogo.SetTextColor(ROOT.kBlack)
             cmsLogo.SetTextAlign(11)
             cmsLogo.SetName("cmsLogo")
-            cmsLogo.DrawLatex(0.545,0.61,"CMS")
+#            cmsLogo.DrawLatex(0.545,0.61,"CMS")
+            cmsLogo.DrawLatex(0.60,0.61,"CMS")
             del cmsLogo
             cmsPrelim = ROOT.TLatex()
             cmsPrelim.SetNDC()
@@ -413,7 +428,8 @@ for process in processes:
             cmsPrelim.SetTextColor(ROOT.kBlack)
             cmsPrelim.SetTextAlign(11)
             cmsPrelim.SetName("cmsPrelim")
-            cmsPrelim.DrawLatex(0.645,0.61,"Work in Progress")
+#            cmsPrelim.DrawLatex(0.65,0.61,"Preliminary")
+            cmsPrelim.DrawLatex(0.71,0.61,"Preliminary")
             del cmsPrelim
             latexWJet = ROOT.TLatex()
             latexWJet.SetNDC()
@@ -425,14 +441,14 @@ for process in processes:
             latexWJet.SetName("latexWJet")
             if (process == "W1J"):
                 if (tablename == 'd31-x01-y01.merged' or tablename == 'd81-x01-y01.merged'):
-                    wtitle = "W(#rightarrow#mu#nu) + 1j"
+                    wtitle = "W(#rightarrow#mu#nu) + 1 jet"
                 else:
-                    wtitle = "W(#rightarrow#mu#nu) + 1j + X"
+                    wtitle = "W(#rightarrow#mu#nu) + #geq 1 jets"
             elif (process == "W2J"):
-                wtitle = "W(#rightarrow#mu#nu) + 2j + X"
+                wtitle = "W(#rightarrow#mu#nu) + #geq 2 jets"
             elif (process == "W3J"):
-                wtitle = "W(#rightarrow#mu#nu) + 3j + X"
-            latexWJet.DrawLatex(0.63,0.55, wtitle)
+                wtitle = "W(#rightarrow#mu#nu) + #geq 3 jets"
+            latexWJet.DrawLatex(0.62,0.55, wtitle)
             if (doNP):
                 MEgentitle = "NP Corr. Applied"
                 latexWJet.SetTextFont(52)
@@ -451,11 +467,13 @@ for process in processes:
             htemp1.GetXaxis().SetTitleOffset(1.1)
             htemp1.GetXaxis().SetTitleSize(0.09)
             htemp1.GetXaxis().SetLabelSize(0.09)
-            htemp1.GetYaxis().SetTitle("Theory/Data      ")
+            htemp1.GetYaxis().SetTitle("Theory/Data      ") # nominal
+#            htemp1.GetYaxis().SetTitle("Theory/MG5      ") # TEMP
             htemp1.GetYaxis().SetTitleOffset(0.45)
             htemp1.GetYaxis().SetTitleSize(0.09)
             htemp1.GetYaxis().SetLabelSize(0.06)
-            htemp1.GetYaxis().SetRangeUser(0.01, 2.15)
+            htemp1.GetYaxis().SetRangeUser(0.01, 2.15) # nominal
+#            htemp1.GetYaxis().SetRangeUser(0.5, 2.75) # zoom out
 #            htemp1.GetYaxis().SetRangeUser(0.51, 1.49)
             htemp1.SetTitle("")
             htemp1.Draw()
@@ -496,8 +514,12 @@ for process in processes:
                 #Do error calculations in quadrature
                 #Note: errors for all alpha-s variations are currently taken to be the same
                 for i in range(numBins):
+                    # normal
                     binContentUnfTemp = ( hUnf.GetBinContent(i+binDataOffset+1) )
                     yErrUnfTemp = ( hUnf.GetBinError(i+binDataOffset+1) )
+                    # TEMP
+#                    binContentUnfTemp = ( hWJetsNLOFxFx.GetBinContent(i+binDataOffset+1) )
+#                    yErrUnfTemp = ( hWJetsNLOFxFx.GetBinError(i+binDataOffset+1) )
 
                     arrayMCToData1.append((hWJetsNLOFxFx.GetBinContent(i+binDataOffset+1))/binContentUnfTemp)
                     arrayMCToData2.append(centralMEPDFArray[i]/binContentUnfTemp)

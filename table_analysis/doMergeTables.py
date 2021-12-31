@@ -3,15 +3,16 @@ import os
 import sys
 import datetime
 #######################################
-basedir = "./"
-num = 200
+basedir = "./"  
+num = 200  
 # ---
 #tablenums = ["d56"] # w+1j
 #tablenums = ["d57", "d63"] # w+2j
-#tablenums = ["d58", "d64"] # w+3j
+tablenums = ["d58", "d64"] # w+3j
 # ---
 #tablenums = ["d56"] # w+1j 
-tablenums = ["d57"] # w+2j 
+#tablenums = ["d57"] # w+2j 
+#tablenums = ["d58"] # w+3j
 #######################################
 for itab, tablenum in enumerate(tablenums):
     print("\n >>> Merging all tables for tablenum: "+str(tablenum))

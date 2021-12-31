@@ -9,6 +9,8 @@ import argparse
 import re
 import os
 
+# ----
+
 parser = argparse.ArgumentParser(description='Compares cross sections calculated with fastnlo with those calculated by rivet.')
 parser.add_argument('basename',default='yb0_ystar0_zpt',help='This is the basename of the table, it will be used to find the corresponding table file name and the yoda histogram in the yoda file provided')
 parser.add_argument('--path',default='.',help='Path that will be used to search for tables')
@@ -17,15 +19,17 @@ parser.add_argument('--pdf',default='CT14nlo',help='Name of the pdf to use in th
 parser.add_argument('--out',default='',help='Output file name')
 args = parser.parse_args()
 
+# ----
+
 for f in os.listdir(args.path):
     if re.search(args.basename+'.*\.tab.gz',f):
         table = args.path+'/'+f
 
 # for BlackHat
-#fnlo = fastnlo.fastNLOLHAPDF(table,args.pdf,0)
+#fnlo = fastnlo.fastNLOLHAPDF(table, args.pdf, 0)
 
 # for OpenLoops
-fnlo = fastnlo.fastNLOCRunDec(table,args.pdf,0)
+fnlo = fastnlo.fastNLOCRunDec(table, args.pdf, 0)
 fnlo.SetNFlavor(0)
 fnlo.SetNLoop(2)
 
@@ -45,18 +49,19 @@ fnlo.CalcCrossSection()
 xs_rivet = np.array([ b.height for b in rivet.bins ])
 xs_fnlo  = np.array(fnlo.GetCrossSection())
 
-print xs_fnlo
-print xs_rivet
+print "\nxs_fnlo = "+str(xs_fnlo)
+print "xs_rivet = "+str(xs_rivet)+"\n"
 
 N = fnlo.GetNDim0Bins()
 
+# ----
+
 fig, ax = plt.subplots()
-ax.set(ylabel='$\mathrm{xs_{fastNLO}/xs_{Rivet}}$',xlabel='$p_{T}$ bin index',title='fastNLO cross check')
+ax.set(ylabel='$\mathrm{xs_{fastNLO}/xs_{Rivet}}$',xlabel='$p_{T}$ bin index',title='fastNLO/Rivet closure check')
 
 ax.yaxis.label.set_size(18)
 ax.set(ylim=[0.99,1.01])
 ax.grid(b=True,which='major')
-
 ax.set_yticks([1-0.001,1+0.001],minor=True)
 ax.set_yticklabels([u' -1 \u2030',u'+1 \u2030'],minor=True)
 ax.tick_params(axis='y',which='minor',labelleft=False,labelright=True,)
@@ -65,8 +70,13 @@ ax.axhspan(1-0.001,1+0.001,color='b',alpha=.1)
 
 ax.plot( range(1,N+1), xs_fnlo/xs_rivet, 'bo')
 
+# ----
+
 if args.out:
     out = args.out
 else:
     out = args.path+'/'+args.basename+'_check.png'
+
+print "Saving... "+str(out)+"\n"
 fig.savefig(out)
+

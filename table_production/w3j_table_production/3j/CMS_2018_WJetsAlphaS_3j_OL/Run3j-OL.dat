@@ -1,0 +1,66 @@
+(run){
+  ANALYSIS Rivet;
+
+  LOOPGEN:=OpenLoops;
+  OL_PREFIX=/home/wisecarver.a/FastNLOInstallv3/OpenLoops-2.0.0;
+  #OL_PREFIX=/home/awisecar/FastNLOInstallv3/OpenLoops-2.0.0;
+
+  % Printout settings
+  EVENT_DISPLAY_INTERVAL=50000;
+  BATCH_MODE=7;
+
+  #use dummy virtual to speed up integration
+  USE_DUMMY_VIRTUAL=1;
+
+  % -----------------------------------
+
+  % (integration)
+  INTEGRATION_ERROR 0.1;
+  PSI_ITMIN 60000;
+
+  % (isr)
+  PDF_LIBRARY=LHAPDFSherpa;
+  PDF_SET=NNPDF30_nnlo_as_0118;
+
+  % (beam)
+  % LHC collider setup
+  BEAM_1 2212; BEAM_ENERGY_1 6500;
+  BEAM_2 2212; BEAM_ENERGY_2 6500;
+
+  % (me)
+  ME_SIGNAL_GENERATOR Comix LOOPGEN;
+  EVENT_GENERATION_MODE Weighted;
+  SCALES VAR{0.25*H_Tp2}{0.25*H_Tp2};   # partonic H_T'^2 (no FastJet clustering)
+}(run);
+
+(processes){
+% W-
+  Process 93 93 -> 13 -14 93 93 93;
+  Order (*,2);
+  NLO_QCD_Mode Fixed_Order; 
+  NLO_QCD_Part BVIRS;
+  #Loop_Generator Internal; #for dummy virtual, turn on only for integration
+  Loop_Generator LOOPGEN; #turn this back on for evt gen
+  End process;
+% W+
+  Process 93 93 -> -13 14 93 93 93;
+  Order (*,2);
+  NLO_QCD_Mode Fixed_Order;
+  NLO_QCD_Part BVIRS;
+  #Loop_Generator Internal; #for dummy virtual, turn on only for integration
+  Loop_Generator LOOPGEN; #turn this back on for evt gen
+  End process;
+}(processes);
+
+(selector){
+  FastjetFinder  antikt  3  30.  0.  0.8;
+}(selector);
+
+(analysis){ 
+  BEGIN_RIVET {
+    -a MCgrid_CMS_2018_WJetsAlphaS_3j_OL;
+    IGNOREBEAMS 1;
+    USE_HEPMC_SHORT 1;
+    USE_HEPMC_EXTENDED_WEIGHTS 1;
+  } END_RIVET;
+}(analysis);

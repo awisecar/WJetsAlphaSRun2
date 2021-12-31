@@ -1,0 +1,16 @@
+Name: MCgrid_CMS_2018_WJetsAlphaS_2j_OL
+Year: 2018
+Summary: Extraction of the QCD coupling constant using ratios of differential cross sections of the associated production of a W boson and jets in proton-proton collisions at sqrt(s) = 13 TeV
+Experiment: CMS
+Collider: LHC
+SpiresID:
+Status: VALIDATED
+Authors:
+ - andrew.lloyd.wisecarver@cern.ch - modified for MCgrid
+References:
+RunInfo: 13 TeV $pp \to W+jets$.
+Beams: [p+, p+]
+Energies: [13000]
+Description:
+  ''
+

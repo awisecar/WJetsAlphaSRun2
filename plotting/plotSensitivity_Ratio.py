@@ -7,14 +7,27 @@ import math
 from array import array
 import ROOT
 ##################################################
-### R21 (list num first, then denom)
-numerator = 'W2J'
+### -- R21 (list num first, then denom)
+#numerator   = 'W2J'
+#denominator = 'W1J'
+#tablenames = [ ['d57-x01-y01.merged', 'd56-x01-y01.merged'] ]
+#variables = [ ["LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold", "LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold"] ]
+### -- R32 (list num first, then denom)
+#numerator   = 'W3J'
+#denominator = 'W2J'
+#tablenames = [ ['d58-x01-y01.merged', 'd57-x01-y01.merged'],
+#               ['d64-x01-y01.merged', 'd63-x01-y01.merged'] ]
+#variables = [ ["LepPtPlusLeadingJetAK8Pt_Zinc3jet_TUnfold", "LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold"],
+#              ["LepPtPlusHT2over2AK8_Zinc3jet_TUnfold", "LepPtPlusHT2over2AK8_Zinc2jet_TUnfold"] ]
+### -- R31 (list num first, then denom)
+numerator   = 'W3J'
 denominator = 'W1J'
-tablenames = [ ['d57-x01-y01.merged','d56-x01-y01.merged'] ]
-variables = [ ["LepPtPlusLeadingJetAK8Pt_Zinc2jet_TUnfold", "LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold"] ]
-## --
-#pdfnames = ['CT10nlo', 'CT14nlo', 'NNPDF23_nlo', 'NNPDF30_nlo', 'NNPDF31_nnlo']
-pdfnames = ['CT14nlo']
+tablenames = [ ['d58-x01-y01.merged', 'd56-x01-y01.merged'] ]
+variables = [ ["LepPtPlusLeadingJetAK8Pt_Zinc3jet_TUnfold", "LepPtPlusLeadingJetAK8Pt_Zinc1jet_TUnfold"] ]
+## -----------------------------------------------
+pdfnames = ['CT18NLO_as_']
+#pdfnames = ['CT14nlo', 'CT18NLO_as_', 'NNPDF30_nlo', 'NNPDF31_nlo',
+#            'HERAPDF20_N', 'ABMP16als11', 'MSHT20nlo_a']
 ## --
 doSyst = True
 #doSyst = False
@@ -71,9 +84,9 @@ for iTab, tablename in enumerate(tablenames):
         print ("Number of bins in histogram: "+str(int(numBins)))
         
         ## Grab the FNLO distributions
-        dataInMEnum = pd.read_csv(basedir+csvInfileMEnum, skiprows=[1]) #skip first row, but with keeping headers
-        dataInMEdenom = pd.read_csv(basedir+csvInfileMEdenom, skiprows=[1])
-        dataInMEPDFnum = pd.read_csv(basedir+csvInfileMEPDFnum, skiprows=[1])
+        dataInMEnum      = pd.read_csv(basedir+csvInfileMEnum, skiprows=[1]) #skip first row, but with keeping headers
+        dataInMEdenom    = pd.read_csv(basedir+csvInfileMEdenom, skiprows=[1])
+        dataInMEPDFnum   = pd.read_csv(basedir+csvInfileMEPDFnum, skiprows=[1])
         dataInMEPDFdenom = pd.read_csv(basedir+csvInfileMEPDFdenom, skiprows=[1])
         
         ## Check binnings between num and denom are the same
@@ -93,29 +106,23 @@ for iTab, tablename in enumerate(tablenames):
         xtitle = 'pT [GeV]'
         binDataOffset = 1
         if ((numerator == 'W2J') and (denominator == 'W1J')):
-            if (tablename[0] == 'd07-x01-y01.merged' and tablename[1] == 'd06-x01-y01.merged'):
-                xtitle = 'Muon pT + Leading Jet pT [GeV]'
-                binDataOffset = 1
-            if (tablename[0] == 'd07-x01-y01.merged' and tablename[1] == 'd31-x01-y01.merged'):
-                xtitle = 'Muon pT + Leading Jet pT [GeV]'
-                binDataOffset = 1
             if (tablename[0] == 'd57-x01-y01.merged' and tablename[1] == 'd56-x01-y01.merged'):
-                xtitle = 'Muon pT + Leading AK8 Jet pT [GeV]'
+                xtitle = 'Muon pT + Leading Jet pT [GeV]'
                 binDataOffset = 3
             if (tablename[0] == 'd57-x01-y01.merged' and tablename[1] == 'd81-x01-y01.merged'):
                 xtitle = 'Muon pT + Leading Jet pT [GeV]'
-                binDataOffset = 1
+                binDataOffset = 3
         elif ((numerator == 'W3J') and (denominator == 'W2J')):
             if (tablename[0] == 'd58-x01-y01.merged' and tablename[1] == 'd57-x01-y01.merged'):
-                xtitle = 'Muon pT + Leading AK8 Jet pT [GeV]'
-                binDataOffset = 1
+                xtitle = 'Muon pT + Leading Jet pT [GeV]'
+                binDataOffset = 3
             if (tablename[0] == 'd64-x01-y01.merged' and tablename[1] == 'd63-x01-y01.merged'):
                 xtitle = 'Muon pT + H_{T,2}/2 [GeV]'
-                binDataOffset = 1
+                binDataOffset = 2
         elif ((numerator == 'W3J') and (denominator == 'W1J')):
             if (tablename[0] == 'd58-x01-y01.merged' and tablename[1] == 'd56-x01-y01.merged'):
-                xtitle = 'Muon pT + Leading AK8 Jet pT [GeV]'
-                binDataOffset = 1
+                xtitle = 'Muon pT + Leading Jet pT [GeV]'
+                binDataOffset = 3
 
         ##################################################
 
@@ -159,20 +166,21 @@ for iTab, tablename in enumerate(tablenames):
         c2.Update()
         c2.Draw()
 
-        xmin2 = binCenMEnum[0]-3.
-        xmax2 = binCenMEnum[int(numBins)-1]+3.
-        ymin2 = 0.851
-        ymax2 = 1.149
+        xmin = binCenMEnum[0]-3.
+        xmax = binCenMEnum[int(numBins)-1]+3.
+        ymin = 0.851
+        ymax = 1.149
 
-        htemp2 = ROOT.TH1D('aSRatios2_', "Ratio to Central XSec Ratio (aS = 0.118)", 100, xmin2, xmax2)
+        htemp2 = ROOT.TH1D('aSRatios2_', "Ratio to Central XSec Ratio (aS = 0.118)", 100, xmin, xmax)
         htemp2.SetStats(0)
         htemp2.GetXaxis().SetTitle(xtitle)
         htemp2.GetXaxis().SetTitleOffset(1.2)
         # htemp2.GetYaxis().SetTitle('Ratio to Central #alpha_{s} Prediction')
         # htemp2.GetYaxis().SetTitle('Fractional Sensitivity to #alpha_{s} Variations')
+#        htemp2.GetYaxis().SetTitle('#alpha_{s} Sensitivity vs. Fractional Uncertainty')
         htemp2.GetYaxis().SetTitle('#alpha_{s} Sensitivity')
         htemp2.GetYaxis().SetTitleOffset(1.3)
-        htemp2.GetYaxis().SetRangeUser(ymin2, ymax2)
+        htemp2.GetYaxis().SetRangeUser(ymin, ymax)
         htemp2.SetTitle("")
         htemp2.Draw()
 
@@ -180,7 +188,7 @@ for iTab, tablename in enumerate(tablenames):
             legLowY = 0.725
         else:
             legLowY = 0.775
-        leg2 = ROOT.TLegend(0.34,legLowY,0.9,0.9)
+        leg2 = ROOT.TLegend(0.28,legLowY,0.9,0.9)
 
         procLatex = ROOT.TLatex()
         procLatex.SetNDC()
@@ -283,6 +291,15 @@ for iTab, tablename in enumerate(tablenames):
                 gr.SetMarkerColorAlpha(1, 0)
                 gr.SetLineWidth(1)
                 gr.SetLineStyle(11)
+            ## -- Legend --
+            if (pdfname == 'HERAPDF20_N'):
+                pdfname = 'HERAPDF20_NLO'
+            if (pdfname == 'CT18NLO_as_'):
+                pdfname = 'CT18nlo'
+            if (pdfname == 'ABMP16als11'):
+                pdfname = 'ABMP16_5_nlo'
+            if (pdfname == 'MSHT20nlo_a'):
+                pdfname = 'MSHT20nlo'
             if i==0:
                 leg2.AddEntry(gr, "ME+PDF Variation: "+pdfname+", #alpha_{s} = "+str(round(alphas,3)), "l")
             elif i==(int(numVarMEPDF-1)):
@@ -296,15 +313,7 @@ for iTab, tablename in enumerate(tablenames):
             gr.Draw('C same')
 
 
-
-
-
-
-
-
-
-
-
+        # -----------------------------------------------------------------------------------
 
         if (doSyst):
 
@@ -337,7 +346,7 @@ for iTab, tablename in enumerate(tablenames):
                 print("      percent error (stat.): "+str(fractionalStatErrTemp*100.)+" %")
 
                 # --- stat.+syst. uncertainty (added in quadrature) ---
-                statErrSqrd = pow(hUnfRatio.GetBinError(i+1+binDataOffset), 2.)
+                statErrSqrd = pow(hUnfRatio.GetBinError(i+1+binDataOffset), 2.0)
                 systErrSqrd = hTotCovMatrix.GetBinContent(i+1+binDataOffset, i+1+binDataOffset) # getting error^2 from diagonal entries of covariance matrix
                 errTemp = math.sqrt( statErrSqrd + systErrSqrd )
                 # need to put the fractional uncertainty for this plot
@@ -371,20 +380,7 @@ for iTab, tablename in enumerate(tablenames):
             
             print("")
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        # -----------------------------------------------------------------------------------
 
 
         leg2.Draw("same")
@@ -395,12 +391,12 @@ for iTab, tablename in enumerate(tablenames):
             if (boundLow < 30.):
                 boundLow = 100.
             boundUp = binCenMEnum[numBins-1]
-            lineBoundLow = ROOT.TLine(boundLow, ymin2, boundLow, ymax2)
+            lineBoundLow = ROOT.TLine(boundLow, ymin, boundLow, ymax)
             lineBoundLow.SetLineColorAlpha(ROOT.kBlack, 0.5)
             lineBoundLow.SetLineWidth(2)
             lineBoundLow.SetLineStyle(9)
             lineBoundLow.Draw()
-            lineBoundUp = ROOT.TLine(boundUp, ymin2, boundUp, ymax2)
+            lineBoundUp = ROOT.TLine(boundUp, ymin, boundUp, ymax)
             lineBoundUp.SetLineColorAlpha(ROOT.kBlack, 0.5)
             lineBoundUp.SetLineWidth(2)
             lineBoundUp.SetLineStyle(9)

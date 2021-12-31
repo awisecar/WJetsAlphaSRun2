@@ -17,8 +17,8 @@ import argparse
 # https://rc.northeastern.edu/support/documentation/
 
 # Example for running script to submit jobs:
-# ./submitSherpaJobs.py 10 50
-# ./submitSherpaJobs.py 20 150
+# ./submitSherpaJobs.py 10 50 
+# ./submitSherpaJobs.py 20 150 
 
 ######################
 
@@ -53,13 +53,21 @@ elif (args.process == 10):
     #numEvents = "45M" # works well
     #numEvents = "85M" # too high
     #numEvents = "55M" # some jobs failed
-    numEvents = "52M" # works efficiently, FOR ANALYSIS
+    #numEvents = "52M" # works efficiently, FOR ANALYSIS
+    #numEvents = "35M" # temporary, using to speed things up
+    numEvents = "17M" # temporary, using to speed things up
     #numEvents = "10M" # FOR TABLE WARMUP
     memRequest = "1G"
     #runCardLocation = '/home/wisecarver.a/MakeTablesv3/openloops/20-11-11/1j/CMS_2018_WJetsAlphaS_1j_OL/'
     #runCardLocation = '/home/wisecarver.a/MakeTablesv3/openloops/20-12-15/1j/CMS_2018_WJetsAlphaS_1j_OL/'
     #runCardLocation = '/home/wisecarver.a/MakeTablesv3/openloops/21_03_13/1j/CMS_2018_WJetsAlphaS_1j_OL/'
-    runCardLocation = '/home/wisecarver.a/MakeTablesv3/openloops/21_04_21/1j/CMS_2018_WJetsAlphaS_1j_OL/'
+    #runCardLocation = '/home/wisecarver.a/MakeTablesv3/openloops/21_04_21/1j/CMS_2018_WJetsAlphaS_1j_OL/'
+
+    #runCardLocation = '/home/wisecarver.a/MakeTablesv3/openloops/21_07_19/1j_AndrewEdit/1j/CMS_2018_WJetsAlphaS_1j_OL/' # 1j_AndrewEdit
+    #runCardLocation = '/home/wisecarver.a/MakeTablesv3/openloops/21_07_19/1j_JoonBinEdit/1j/CMS_2018_WJetsAlphaS_1j_OL/' # 1j_JoonBinEdit
+    #runCardLocation = '/home/wisecarver.a/MakeTablesv3/openloops/21_07_19/1j_5flavorCheck/1j/CMS_2018_WJetsAlphaS_1j_OL/' # 1j_5flavorCheck
+    runCardLocation = '/home/wisecarver.a/MakeTablesv3/openloops/21_07_19/1j_5flavorCheck_take2/1j/CMS_2018_WJetsAlphaS_1j_OL/' # 1j_5flavorCheck_take2
+
     runCardName = 'Run1j-OL.dat'
     yodaOutRoot = 'w1jetsFO_'+str(numEvents)+'_'
 # Fixed order + Parton shower
@@ -74,15 +82,21 @@ elif (args.process == 12):
 ### --------------------------------------
 # Fixed order (FastNLO tables)
 elif (args.process == 20):
+
     #numEvents = "25M" # too high
     #numEvents = "17M" # works well
-    numEvents = "14M" # works well, safer than 17M, FOR ANALYSIS
+    #numEvents = "14M" # works well, safer than 17M, FOR ANALYSIS (nominal)
     #numEvents = "7M" # FOR TABLE WARMUP
+    numEvents = "10M" # temporary, to speed things up...
+
     memRequest = "1G"
+
     #runCardLocation = '/home/wisecarver.a/MakeTablesv3/openloops/20-11-11/2j/CMS_2018_WJetsAlphaS_2j_OL/'
     #runCardLocation = '/home/wisecarver.a/MakeTablesv3/openloops/20-12-15/2j/CMS_2018_WJetsAlphaS_2j_OL/'
     #runCardLocation = '/home/wisecarver.a/MakeTablesv3/openloops/21_03_13/2j/CMS_2018_WJetsAlphaS_2j_OL/'
-    runCardLocation = '/home/wisecarver.a/MakeTablesv3/openloops/21_04_21/2j/CMS_2018_WJetsAlphaS_2j_OL/'
+    #runCardLocation = '/home/wisecarver.a/MakeTablesv3/openloops/21_04_21/2j/CMS_2018_WJetsAlphaS_2j_OL/'
+    runCardLocation = '/home/wisecarver.a/MakeTablesv3/openloops/21_07_19/2j_JoonBinEdit/2j/CMS_2018_WJetsAlphaS_2j_OL/'
+
     runCardName = 'Run2j-OL.dat'
     yodaOutRoot = 'w2jetsFO_'+str(numEvents)+'_'
 # Fixed order + Parton shower
@@ -97,11 +111,13 @@ elif (args.process == 22):
 ### --------------------------------------
 # Fixed order (FastNLO tables)
 elif (args.process == 30):
-    #numEvents = 1900000 # 1.9M events, works well
-    numEvents = "2M" # try this
+    numEvents = 1900000 # 1.9M events, works well
+    #numEvents = "2M" # try this
     memRequest = "3G"
     #runCardLocation = '/home/wisecarver.a/MakeTablesv3/openloops/20-11-11/3j/CMS_2018_WJetsAlphaS_3j_OL/'
-    runCardLocation = '/home/wisecarver.a/MakeTablesv3/openloops/20-12-15/3j/CMS_2018_WJetsAlphaS_3j_OL/'
+    #runCardLocation = '/home/wisecarver.a/MakeTablesv3/openloops/20-12-15/3j/CMS_2018_WJetsAlphaS_3j_OL/'
+    #runCardLocation = '/home/wisecarver.a/MakeTablesv3/openloops/21_04_21/3j/CMS_2018_WJetsAlphaS_3j_OL/'
+    runCardLocation = '/home/wisecarver.a/MakeTablesv3/openloops/21_07_19/3j_JoonBinEdit/3j/CMS_2018_WJetsAlphaS_3j_OL/'
     runCardName = 'Run3j-OL.dat'
     yodaOutRoot = 'w3jetsFO_'+str(numEvents)+'_'
 # Fixed order + Parton shower
@@ -136,7 +152,7 @@ os.system('mkdir -p ' + mtmpdir)
 
 # Set the seed for the random number generator
 # These random numbers are then used as random seeds for Sherpa commands
-random.seed(1019)
+random.seed(1025)
 
 print('\n=============================================\n')
 
@@ -172,6 +188,7 @@ for i in range(1, args.numJobs+1):
         submit += '#SBATCH --time=00:30:00\n' #for testing
     else:
         submit += '#SBATCH --time=23:59:59\n' #for regular jobs
+        #submit += '#SBATCH --time=08:59:59\n' # TEMP
     submit += '#SBATCH --job-name=sherpa_process'+str(args.process)+'_job'+str(i)+'\n'
     if (args.process == 0):
         submit += '#SBATCH --partition=express\n'
